@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>언어와 마음 · 독철 조 독일어 TOT 실험 프로그램 (v3)</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --border: #dbe3ee;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --amber: #d97706;
+    --rose: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  header {
+    background: #0f172a;
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  header .brand { font-weight: 700; font-size: 16px; }
+  header .sub { font-size: 12.5px; color: #94a3b8; }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #cbd5e1; }
+  .progress-bar { width: 170px; height: 8px; background: #334155; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: #38bdf8; transition: width 0.25s ease; }
+  main { max-width: 960px; margin: 24px auto 48px; padding: 0 18px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  }
+  h1 { margin: 0 0 8px; font-size: 23px; }
+  h2 { margin: 0 0 12px; font-size: 19px; }
+  h3 { margin: 18px 0 8px; font-size: 15.5px; }
+  p { margin: 6px 0; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  label { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 5px; color: #334155; }
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14.5px; background: #fff;
+  }
+  .check-row {
+    display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; font-size: 13.5px; cursor: pointer; font-weight: 500;
+  }
+  .check-row input { margin-top: 3px; width: auto; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  button {
+    border: none; border-radius: 11px; padding: 11px 18px; font-size: 14.5px; font-weight: 700; cursor: pointer;
+    transition: transform 0.06s ease, background 0.15s ease, opacity 0.15s;
+  }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+  .btn-secondary { background: #e2e8f0; color: #1e293b; }
+  .btn-secondary:hover:not(:disabled) { background: #cbd5e1; }
+  .btn-success { background: #16a34a; color: #fff; }
+  .btn-success:hover:not(:disabled) { background: #15803d; }
+  .btn-tot { background: var(--amber); color: #fff; }
+  .btn-tot:hover:not(:disabled) { background: #b45309; }
+  .btn-unknown { background: #64748b; color: #fff; }
+  .btn-unknown:hover:not(:disabled) { background: #475569; }
+  .btn-danger { background: var(--rose); color: #fff; }
+  .btn-danger:hover:not(:disabled) { background: #b91c1c; }
+  .btn-outline { background: #fff; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover:not(:disabled) { background: #f8fafc; }
+  .hidden { display: none !important; }
+
+  .stage-badge {
+    display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    background: #dbeafe; color: #1e40af; margin-bottom: 10px;
+  }
+  .info-banner {
+    background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e;
+    border-radius: 12px; padding: 12px 14px; font-size: 13.5px; margin-top: 12px;
+  }
+  .timeout-banner {
+    background: #fef2f2; border: 1.5px solid #fca5a5; color: #991b1b;
+    border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 700;
+    margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .trial-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 12px; }
+  .timer-box { display: flex; align-items: center; gap: 10px; }
+  .timer-num { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 68px; text-align: right; }
+  .timer-num.warn { color: var(--rose); }
+  .timer-track { width: 160px; height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+  .timer-bar { height: 100%; width: 100%; background: var(--primary); transition: width 0.08s linear; }
+  .timer-bar.warn { background: var(--rose); }
+
+  .stimulus-box {
+    background: #ffffff; border: 2px solid #e2e8f0; border-radius: 18px; height: 330px;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; margin-bottom: 14px;
+  }
+  .stimulus-box img { width: 235px; height: 235px; object-fit: contain; }
+  .nudge-pill {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+    padding: 5px 14px; border-radius: 999px; font-size: 13px; font-weight: 700;
+    animation: fadeIn 0.25s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  /* Voice status bar */
+  .voice-bar {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 12px;
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; font-size: 13px;
+  }
+  .vu-track { width: 90px; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .vu-fill { height: 100%; width: 0%; background: #16a34a; transition: width 0.06s linear; }
+  .voice-transcript { color: #334155; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .choice-btn { padding: 16px 12px; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .choice-btn small { font-weight: 500; opacity: 0.9; font-size: 12px; }
+
+  .tot-panel, .success-panel {
+    margin-top: 14px; padding: 18px; border-radius: 14px; background: #fffbeb; border: 1.5px solid #fcd34d;
+  }
+  .success-panel { background: #f0fdf4; border-color: #86efac; }
+
+  /* Blurred answer check inside Success panel ONLY */
+  .ans-reveal-box {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+    background: #ffffff; border: 1px solid #bbf7d0; border-radius: 10px;
+    margin: 6px 0 10px; cursor: pointer; user-select: none;
+  }
+  .ans-blurred {
+    filter: blur(6px); transition: filter 0.15s ease; font-weight: 800; font-size: 15.5px; color: #0f172a;
+  }
+  .ans-reveal-box:hover .ans-blurred,
+  .ans-reveal-box.revealed .ans-blurred { filter: none; }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--ink); font-weight: 700; font-size: 13.5px; cursor: pointer;
+  }
+  .chip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 12px; margin: 14px 0 20px; }
+  .kpi { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  .kpi .k-label { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .kpi .k-val { font-size: 22px; font-weight: 800; margin-top: 4px; color: #0f172a; }
+  .kpi .k-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  th, td { border: 1px solid var(--border); padding: 7px 9px; text-align: left; }
+  th { background: #f1f5f9; font-weight: 700; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+  .tag-ok { background: #dcfce7; color: #166534; }
+  .tag-tot { background: #fef3c7; color: #92400e; }
+  .tag-no { background: #e2e8f0; color: #475569; }
+  .tag-wrong { background: #fee2e2; color: #991b1b; }
+  .tag-cue { background: #dbeafe; color: #1e40af; }
+  .tag-ctrl { background: #f3e8ff; color: #6b21a8; }
+
+  .gallery-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 12px;
+    margin-top: 14px; max-height: 62vh; overflow-y: auto; padding-right: 4px;
+  }
+  .gal-card {
+    border: 1.5px solid var(--border); border-radius: 12px; padding: 10px; background: #fff;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  }
+  .gal-card.unchecked { opacity: 0.4; }
+  .gal-card img { width: 88px; height: 88px; object-fit: contain; }
+  .gal-title { font-weight: 700; font-size: 13.5px; }
+  .gal-sub { font-size: 12px; color: var(--muted); }
+  .script-box {
+    background: #f8fafc; border-left: 4px solid var(--primary); padding: 14px 16px;
+    border-radius: 8px; font-size: 15px; margin: 12px 0;
+  }
+  .chart-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 16px 0; }
+  .chart-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; background: #fff; }
+  .override-link {
+    background: none; border: none; color: #991b1b; text-decoration: underline;
+    font-size: 12px; font-weight: 600; padding: 2px 4px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">언어와 마음 · 독철 조 독일어 TOT 실험 프로그램 (v3)</div>
+    <div class="sub">5초 제한(초과 시 TOT/모름 전용) · 정답 노출 차단 · 오답 처리 · 마이크 발화 감지</div>
+  </div>
+  <div class="progress-wrap">
+    <span id="hdrPhase">준비</span>
+    <div class="progress-bar"><div class="progress-fill" id="hdrFill"></div></div>
+    <span id="hdrCount">0 / 0</span>
+  </div>
+</header>
+
+<main>
+  <!-- 1. SETUP SCREEN -->
+  <section id="screenSetup" class="card">
+    <h1>예비 실험 시작 설정 (v3 · P01 피드백 반영)</h1>
+    <p class="muted">A1 단색 픽토그램 36문항(`das Fleisch` 고기 픽토그램 개선) + 연습 3문항이 내장되어 있습니다.</p>
+
+    <div class="info-banner">
+      <strong>v3 핵심 개선 사항:</strong><br>
+      1. <strong>기본 5초 제한 + 시간 종료 시 '성공' 버튼 자동 잠금</strong> → 5초 내 즉각 인출이 안 되면 바로 TOT / 모름으로 판별<br>
+      2. <strong>진행 중 정답 버튼 완전 제거</strong> → <code>성공(안다)</code> 확인 창 안에서만 블러 해제 확인 + <strong><code>오답(다른 단어)</code></strong> 분리 기록 (3단계 오염 차단)<br>
+      3. <strong>즉각 육성 발화 지시문 + 마이크 발화 시점(ms) 감지</strong> 및 선택적 실시간 음성 인식 자막 지원
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <label for="pid">참여자 번호 (익명 코드)</label>
+        <input id="pid" type="text" value="P02" placeholder="예: P02, PILOT_유관" />
+      </div>
+      <div>
+        <label for="experimenter">진행자 (실험자)</label>
+        <select id="experimenter">
+          <option value="윤민욱">윤민욱</option>
+          <option value="이유관">이유관</option>
+          <option value="번심이">번심이</option>
+          <option value="직접진행(예비)">직접 테스트 (예비)</option>
+        </select>
+      </div>
+      <div>
+        <label for="studyMonths">독일어 학습 기간 (개월)</label>
+        <input id="studyMonths" type="number" value="12" min="0" max="240" />
+      </div>
+      <div>
+        <label for="selfLevel">독일어 자기평가 수준</label>
+        <select id="selfLevel">
+          <option value="A1">A1 (입문·초급)</option>
+          <option value="A2" selected>A2 (초중급)</option>
+          <option value="B1">B1 (중급)</option>
+          <option value="B2+">B2 이상</option>
+        </select>
+      </div>
+      <div>
+        <label for="runMode">문항 세트 선택</label>
+        <select id="runMode">
+          <option value="all" selected>전체 A1 36문항 (권장 · 약 10~12분)</option>
+          <option value="selected">미리보기에서 체크한 문항만 진행</option>
+          <option value="quick12">빠른 테스트 12문항 (der 4 / die 4 / das 4)</option>
+        </select>
+      </div>
+      <div>
+        <label for="timeLimit">1·3단계 문항당 제한 시간 (초)</label>
+        <input id="timeLimit" type="number" value="5" min="3" max="15" />
+      </div>
+    </div>
+
+    <div style="margin-top:14px; padding:12px 14px; background:#f8fafc; border:1px solid var(--border); border-radius:12px;">
+      <div style="font-weight:700; font-size:13.5px; margin-bottom:4px;">음성 발화 보조 기능 (선택)</div>
+      <label class="check-row">
+        <input type="checkbox" id="optVoiceDetect" checked />
+        <span><strong>마이크 발화 시점 감지 켜기 (오프라인 지원)</strong> — 첫 육성 발화 시점(ms)을 자동 기록하고, 2초간 침묵 시 즉각 발화 안내를 표시합니다.</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="optSpeechRec" />
+        <span><strong>실시간 음성 인식 자막 켜기 (Chrome/Edge 온라인 권장)</strong> — 피험자가 말한 독일어·한국어 단서(“어… 슈…”, “맴돌아”)를 하단에 참고 자막으로 표시·기록합니다.</span>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="startInstructions()">연습 및 실험 시작 →</button>
+      <button class="btn-outline" onclick="openGallery()">픽토그램 39장 미리보기 / 선별</button>
+    </div>
+    <p class="muted" style="margin-top:12px;">
+      단축키 (1:1 진행 시): <strong>1</strong>=성공(제한시간 내) · <strong>2</strong>=TOT(맴돈다) · <strong>3</strong>=모름 · <strong>Space</strong>=타이머 일시정지
+    </p>
+  </section>
+
+  <!-- GALLERY / ITEM PICKER SCREEN -->
+  <section id="screenGallery" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h2>픽토그램 &amp; 단어 미리보기 (39장)</h2>
+        <p class="muted"><code>N11 · das Fleisch(고기)</code>를 직관적인 뼈고기 아이콘으로 교체했습니다. 필요 시 문항 선택 해제나 이미지 교체도 가능합니다.</p>
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn-secondary" onclick="toggleAllMain(true)">36개 전체 선택</button>
+        <button class="btn-secondary" onclick="toggleAllMain(false)">전체 해제</button>
+        <button class="btn-primary" onclick="closeGallery()">설정으로 돌아가기</button>
+      </div>
+    </div>
+    <div id="galleryStats" class="muted" style="margin-top:8px; font-weight:600;"></div>
+    <div id="galleryGrid" class="gallery-grid"></div>
+  </section>
+
+  <!-- 2. STAGE INTRO SCREEN -->
+  <section id="screenIntro" class="card hidden">
+    <span class="stage-badge" id="introBadge">안내</span>
+    <h2 id="introTitle">지시문</h2>
+    <div class="script-box" id="introScript"></div>
+    <p class="muted" id="introNote"></p>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="beginCurrentStage()">시작하기 →</button>
+    </div>
+  </section>
+
+  <!-- 3. TRIAL SCREEN -->
+  <section id="screenTrial" class="card hidden">
+    <div class="trial-top">
+      <div>
+        <span class="stage-badge" id="trialBadge">1단계</span>
+        <span class="muted" id="trialCounter" style="margin-left:8px; font-weight:700;">1 / 36</span>
+      </div>
+      <div class="timer-box" id="timerBox">
+        <div class="timer-track"><div class="timer-bar" id="timerBar"></div></div>
+        <div class="timer-num" id="timerNum">5.0s</div>
+        <button class="btn-outline" style="padding:6px 10px; font-size:12.5px;" onclick="togglePause()" id="pauseBtn">일시정지</button>
+      </div>
+    </div>
+
+    <div id="timeoutBanner" class="timeout-banner hidden">
+      <span>⏱ 제한 시간 종료! 혀끝에서 맴돌면 [TOT (맴돈다)], 전혀 모르면 [모름]을 선택해 주세요.</span>
+      <button type="button" class="override-link" onclick="manualSuccessAfterTimeout()">※ 시간 내 발화(예외 성공)</button>
+    </div>
+
+    <div class="stimulus-box">
+      <img id="trialImg" src="" alt="실험 픽토그램" />
+      <div id="speakNudge" class="nudge-pill hidden">💬 떠오르는 대로 바로 소리 내어 말씀해 주세요!</div>
+    </div>
+
+    <div id="voiceBar" class="voice-bar hidden">
+      <span id="micDot" style="font-weight:700; color:#16a34a;">🎙 마이크</span>
+      <div class="vu-track"><div class="vu-fill" id="vuFill"></div></div>
+      <span id="onsetLabel" class="muted" style="font-size:12px; min-width:95px;">발화 대기 중</span>
+      <span id="voiceTranscript" class="voice-transcript"></span>
+    </div>
+
+    <div id="trialPrompt" style="font-weight:700; font-size:16px; margin-bottom:10px;">그림을 보자마자 떠오르는 대로 소리 내어 독일어(관사 포함)를 말해 주세요.</div>
+
+    <div id="choiceGrid" class="choice-grid">
+      <button class="btn-success choice-btn" id="btnOk" onclick="chooseMain('success')">
+        <span id="btnOkLabel">성공 (안다)</span>
+        <small id="btnOkKey">단축키 1</small>
+      </button>
+      <button class="btn-tot choice-btn" id="btnTot" onclick="chooseMain('tot')">
+        <span id="btnTotLabel">TOT (맴돈다)</span>
+        <small>단축키 2</small>
+      </button>
+      <button class="btn-unknown choice-btn" id="btnNo" onclick="chooseMain('unknown')">
+        <span id="btnNoLabel">모름</span>
+        <small>단축키 3</small>
+      </button>
+    </div>
+
+    <!-- Stage 1 Success / Wrong verification panel (ONLY place where answer can be peeked!) -->
+    <div id="successPanel" class="success-panel hidden">
+      <div style="font-weight:800; font-size:15px; color:#166534;">발화 판정 및 관사 확인</div>
+      <div id="ansRevealBox" class="ans-reveal-box" onclick="revealAnswerInPanel()" title="마우스를 올리거나 클릭해 정답 확인">
+        <span style="font-size:12.5px; color:#15803d; font-weight:700;">정답 확인 (올리기/클릭):</span>
+        <span id="ansRevealText" class="ans-blurred">der Schlüssel (열쇠)</span>
+      </div>
+      <div class="btn-row" style="margin-top:6px;">
+        <button class="btn-success" onclick="confirmDeSuccess('ok_art')">관사 + 단어 모두 정확</button>
+        <button class="btn-outline" onclick="confirmDeSuccess('ok_noart')">단어만 맞음 (관사 틀림/생략)</button>
+        <button class="btn-danger" onclick="confirmDeSuccess('wrong')">오답 (다른 단어 말함)</button>
+        <button class="btn-secondary" id="cancelSuccessBtn" onclick="cancelSubPanel()">취소</button>
+      </div>
+      <p id="spoiledNote" class="muted hidden" style="margin-top:6px; font-size:12px; color:#991b1b;">
+        ※ 정답이 화면에 표시되었으므로, 틀린 단어를 말한 경우 '오답'으로 처리해 주세요 (3단계 TOT 오염 방지).
+      </p>
+    </div>
+
+    <!-- Stage 1 TOT partial-info panel -->
+    <div id="totPanel" class="tot-panel hidden">
+      <div style="font-weight:800; font-size:15.5px; color:#92400e;">TOT 부분 정보 기록 (떠오르는 것만 선택 · 모르면 비워두기)</div>
+      <div class="grid-2" style="margin-top:10px;">
+        <div>
+          <label for="totFirst">떠오르는 첫 글자 (예: S, B, F)</label>
+          <input id="totFirst" type="text" maxlength="3" placeholder="모르면 비움" />
+        </div>
+        <div>
+          <label for="totNote">비슷하게 떠오른 단어 / 메모 (선택)</label>
+          <input id="totNote" type="text" placeholder="예: löbel 등 유사 음운 단어" />
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label>추측 음절 수</label>
+        <div class="chip-group" id="sylChips">
+          <button type="button" class="chip" onclick="pickChip('syl','1',this)">1음절</button>
+          <button type="button" class="chip" onclick="pickChip('syl','2',this)">2음절</button>
+          <button type="button" class="chip" onclick="pickChip('syl','3',this)">3음절</button>
+          <button type="button" class="chip" onclick="pickChip('syl','4',this)">4음절 이상</button>
+          <button type="button" class="chip active" onclick="pickChip('syl','',this)">모름</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label>추측 관사 (der / die / das)</label>
+        <div class="chip-group" id="artChips">
+          <button type="button" class="chip" onclick="pickChip('art','der',this)">der</button>
+          <button type="button" class="chip" onclick="pickChip('art','die',this)">die</button>
+          <button type="button" class="chip" onclick="pickChip('art','das',this)">das</button>
+          <button type="button" class="chip active" onclick="pickChip('art','',this)">모름</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-tot" onclick="submitTotPanel()">TOT 기록 후 다음 문항 →</button>
+        <button class="btn-secondary" onclick="cancelSubPanel()">취소</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. VERIFY SCREEN -->
+  <section id="screenVerify" class="card hidden">
+    <span class="stage-badge" style="background:#fef3c7; color:#92400e;">4단계 · TOT 정답 확인</span>
+    <h2 style="margin-top:6px;">1단계에서 '맴돈다(TOT)'고 답한 단어 검증</h2>
+    <p class="muted">아래 정답이 1단계에서 떠올리려던 단어가 맞는지 확인해 주세요. 다른 단어를 떠올린 경우 유효 TOT에서 제외됩니다.</p>
+    <div id="verifyList"></div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="finishAndShowResults()">검증 완료 및 결과 리포트 보기 →</button>
+    </div>
+  </section>
+
+  <!-- 5. RESULTS SCREEN -->
+  <section id="screenResults" class="card hidden">
+    <span class="stage-badge" style="background:#dcfce7; color:#166534;">실험 완료</span>
+    <h1>참여자 결과 요약 (<span id="resPid"></span>)</h1>
+    <p class="muted" id="resMeta"></p>
+
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="chart-wrap" id="chartWrap"></div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="downloadDetailCsv()">엑셀용 문항별 원자료 CSV 다운로드</button>
+      <button class="btn-success" onclick="downloadSummaryCsv()">참여자 요약 집계 CSV 다운로드</button>
+      <button class="btn-outline" onclick="location.reload()">새 참여자 실험 시작</button>
+    </div>
+
+    <h3>문항별 기록 상세</h3>
+    <div style="overflow-x:auto;">
+      <table id="resultTable"></table>
+    </div>
+  </section>
+</main>
+
+<script>
+const ALL_ITEMS = [{"id": "P01", "phase": "practice", "article": "der", "german": "Stuhl", "fullGerman": "der Stuhl", "korean": "의자", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "S", "iconId": "fluent-emoji-high-contrast:chair", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik04IDVhMyAzIDAgMCAxIDMtM2gxMGEzIDMgMCAwIDEgMyAzdjFhNCA0IDAgMCAxLTMgMy44NzRWMTNjLjc5MyAwIDEuNTAyLjM0NCAyLjA3My43NzdjLjU3Ny40MzggMS4wODUgMS4wMTggMS41MDIgMS42MjZjLjgwOSAxLjE4IDEuNDI1IDIuNjkgMS40MjUgMy44NDdhMi43NSAyLjc1IDAgMCAxLTIuMDk5IDIuNjcybDEuMzA4IDYuNDU4Yy4yOTIgMS40OC0xLjA0OSAyLjQ2NC0xLjgwNSAwTDIxLjI4IDIyaC0uMzEybC0uMDkgMy45ODJjLS4wNDMgMS41MzMtMS4yOTMgMS4zMzQtMS4zNSAwTDE5LjEzIDIyaC02LjI2bC0uMzk4IDMuOTgyYy0uMDU4IDEuMzM0LTEuMzA3IDEuNTMzLTEuMzUgMEwxMS4wMzIgMjJoLS4zMTNsLTIuMTI0IDYuMzhjLS43NTYgMi40NjQtMi4wOTcgMS40OC0xLjgwNSAwbDEuMzA4LTYuNDU4QTIuNzUgMi43NSAwIDAgMSA2IDE5LjI1YzAtMS4xNTYuNjE2LTIuNjY3IDEuNDI1LTMuODQ3Yy40MTctLjYwOC45MjUtMS4xODggMS41MDItMS42MjZDOS40OTggMTMuMzQ0IDEwLjIwNyAxMyAxMSAxM1Y5Ljg3NEE0IDQgMCAwIDEgOCA2em0zIDEwYy0uMjA3IDAtLjQ5OC4wOTMtLjg2NC4zNzFjLS4zNjEuMjc0LS43MjguNjc4LTEuMDYxIDEuMTYzQzguMzg0IDE3LjU0MiA4IDE4LjY1NiA4IDE5LjI1YzAgLjQxNC4zMzYuNzUuNzUuNzVoMTQuNWEuNzUuNzUgMCAwIDAgLjc1LS43NWMwLS41OTQtLjM4NC0xLjcwOC0xLjA3NS0yLjcxNmMtLjMzMy0uNDg1LS43LS44OS0xLjA2LTEuMTYzYy0uMzY3LS4yNzgtLjY1OC0uMzcxLS44NjUtLjM3MXptOC0ydi0zaC02djN6bTMtN1Y1YTEgMSAwIDAgMC0xLTFIMTFhMSAxIDAgMCAwLTEgMXYxYTIgMiAwIDAgMCAyIDJoOGEyIDIgMCAwIDAgMi0yIi8+PC9zdmc+"}, {"id": "P02", "phase": "practice", "article": "die", "german": "Uhr", "fullGerman": "die Uhr", "korean": "시계", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "U", "iconId": "fluent-emoji-high-contrast:alarm-clock", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik00LjI3MyA5LjIyOGMtLjczNS0yLjI4NC4wMzktNC44ODMgMi4wMzMtNi4yOTRzNC41ODgtMS4xNzggNi4zMi4zOTZjLjU0Mi40OTcuNDg0IDEuNC0uMTA2IDEuODE3bC02LjYwMSA0LjY2Yy0uNi40MTYtMS40MTQuMTMyLTEuNjQ2LS41NzlNMTYgMTFhMSAxIDAgMCAxIDEgMXY0LjQ2NWwyLjU1NSAxLjcwM2ExIDEgMCAwIDEtMS4xMSAxLjY2NGwtMy0yYTEgMSAwIDAgMS0uNDQ1LS44NDlWMTJhMSAxIDAgMCAxIDEtMSIvPjxwYXRoIGQ9Ik0yMy4yMDcgMjQuNThBMTAuNDggMTAuNDggMCAwIDAgMjcgMTYuNUMyNyAxMC43MDEgMjIuMjk5IDYgMTYuNSA2UzYgMTAuNzAxIDYgMTYuNWExMC40NyAxMC40NyAwIDAgMCAzLjI5NyA3LjY0bC0yLjU4NiAyLjIzN0M1LjMxNyAyNy41ODggNi4xMSAzMCA3LjkwNSAzMEgyNC4wOWMxLjc5NiAwIDIuNTk5LTIuNDEyIDEuMTk0LTMuNjIzek0xNi41IDI0YTcuNSA3LjUgMCAxIDEgMC0xNWE3LjUgNy41IDAgMCAxIDAgMTVNMjYuNjk0IDIuOTM0YzEuOTk0IDEuNDEgMi43NjggNC4wMSAyLjAzMyA2LjI5NGMtLjIzMi43MS0xLjA0Ni45OTUtMS42NDYuNTc5bC02LjYtNC42NmMtLjU5MS0uNDE2LS42NS0xLjMyLS4xMDctMS44MTdjMS43MzItMS41NzQgNC4zMjYtMS44MDcgNi4zMi0uMzk2Ii8+PC9nPjwvc3ZnPg=="}, {"id": "P03", "phase": "practice", "article": "das", "german": "Buch", "fullGerman": "das Buch", "korean": "책", "level": "A1", "deSyllables": 1, "koSyllables": 1, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:closed-book", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik02LjUgMS41YTIgMiAwIDAgMC0yIDJ2MjVhMiAyIDAgMCAwIDIgMmgxOWEyIDIgMCAwIDAgMS44ODYtMS4zMzNsLjIzNi0uNjY3SDdhLjUuNSAwIDAgMSAwLTFoMjAuNVY0QTIuNSAyLjUgMCAwIDAgMjUgMS41em0yMCAyNGgtMTh2LTIzSDI1QTEuNSAxLjUgMCAwIDEgMjYuNSA0eiIvPjwvc3ZnPg=="}, {"id": "D01", "phase": "main", "article": "der", "german": "Schlüssel", "fullGerman": "der Schlüssel", "korean": "열쇠", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "S", "iconId": "fluent-emoji-high-contrast:key", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJub25lIj48ZyBjbGlwLXBhdGg9InVybCgjU1ZHa1JDQ3diN1YpIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yMi4yMDkgMmE3LjQ3IDcuNDcgMCAwIDEgNC4wNzYgMS4xODdhOC4wODYgOC4wODYgMCAwIDEgMS40IDEyLjQ3M2E3LjkxIDcuOTEgMCAwIDEtOC41OCAxLjc3bC0zLjU3MSAzLjU4NGExLjA3IDEuMDcgMCAwIDEtLjc0Ni4zMjdhLjguOCAwIDAgMS0uMjE0LS4wMjdhMiAyIDAgMCAwLS41MjYtLjA2NmExLjg0IDEuODQgMCAwIDAtMS4xODUuNGExLjUgMS41IDAgMCAwLS41NCAxLjE0N2ExLjI2IDEuMjYgMCAwIDEtLjM2Ljg5NGExLjE4IDEuMTggMCAwIDEtLjk0NS4zNDhxLS4xMTMuMDAyLS4yNDUtLjAwOGgtLjAyNGExLjQgMS40IDAgMCAwLTEuMDc2Ljg3Yy0uMTQ0LjQyLS4xNTUuODc1LS4wMyAxLjNhLjk2Ljk2IDAgMCAxLS4yMi45MjJjLS43NjEuNzQtMS45NjEgMS45NS0xLjk2MSAxLjk1YTMuMjA2IDMuMjA2IDAgMCAxLTUuMTMxLS44NGEzLjI2IDMuMjYgMCAwIDEgLjY4LTMuNzUxbDExLjYwNC0xMS42MjJhNy41NCA3LjU0IDAgMCAxIDEuNjMtOC4zMzFBOC40NiA4LjQ2IDAgMCAxIDIyLjIwOSAybTIuOTgzIDcuMDFhMS44MyAxLjgzIDAgMCAwIDEuMy0uNTQ0YTEuODkgMS44OSAwIDAgMCAwLTIuNjRhMS44NCAxLjg0IDAgMCAwLTIuNjEzIDBhMS44ODYgMS44ODYgMCAwIDAgMCAyLjY0YTEuODUgMS44NSAwIDAgMCAxLjMxLjU0NHpNMjIuMjA5IDBhMTAuNDggMTAuNDggMCAwIDAtNy4zODYgMy4xMmE5LjUxIDkuNTEgMCAwIDAtMi41IDkuMjA2TDEuNTkyIDIzLjA2YTUuMjggNS4yOCAwIDAgMC0xLjA0MyA2LjA4MmE1LjIwOCA1LjIwOCAwIDAgMCA4LjMyMyAxLjMzOGMuMDA5LS4wMSAxLjE5Mi0xLjIgMS45NDItMS45MzJhMi45OCAyLjk4IDAgMCAwIC44MjQtMi41NjJhMy4xNyAzLjE3IDAgMCAwIDIuNjM0LTIuNjg3cS4yNTQuMDQ1LjUxMi4wNDZhMy4xIDMuMSAwIDAgMCAyLjE2LS45MTJsMi43MTEtMi43MmExMCAxMCAwIDAgMCAyLjQxLjNhOS44MiA5LjgyIDAgMCAwIDcuMDM1LTIuOTVBMTAuMDg1IDEwLjA4NSAwIDAgMCAyNy4zNjYgMS41QTkuNSA5LjUgMCAwIDAgMjIuMjA5IDAiLz48L2c+PGRlZnM+PGNsaXBQYXRoIGlkPSJTVkdrUkNDd2I3ViI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGgzMnYzMkgweiIvPjwvY2xpcFBhdGg+PC9kZWZzPjwvZz48L3N2Zz4="}, {"id": "D02", "phase": "main", "article": "der", "german": "Löffel", "fullGerman": "der Löffel", "korean": "숟가락", "level": "A1", "deSyllables": 2, "koSyllables": 3, "isCompound": false, "firstLetter": "L", "iconId": "fluent-emoji-high-contrast:spoon", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0yNi4yNDMgMjkuNDYxbC0xMi44OC0xMy42MTVhMy4yMiAzLjIyIDAgMCAwLTIuNjE4LS45OGMtMi4xMTQuMTcyLTQuNTYyLS44MTYtNi40NDYtMi44MDhDMS40MTkgOS4wMTQuOTYyIDQuNzc1IDMuMjcgMi41OTJDNS41OC40MDggOS43ODUgMS4xIDEyLjY2NSA0LjE0NWMxLjg4NCAxLjk5MiAyLjczNCA0LjQ5IDIuNDUyIDYuNTk5Yy0uMTM2Ljk3Ny4xNTQgMS45NTMuODI2IDIuNjYyTDI4Ljg1IDI3LjA1M2ExLjc2NyAxLjc2NyAwIDAgMS0uMTI2IDIuNTM3Yy0uNzI4LjY0Mi0xLjgyOS41NjItMi40ODItLjEyOU01LjMzNyAxMS4wNzZjMi4xNjIgMi4yODcgNS4zMjQgMi44MDggNy4wNiAxLjE2NWMxLjczOC0xLjY0MiAxLjM5My00LjgyOC0uNzctNy4xMTRDOS40NjQgMi44NCA2LjMwMyAyLjMxOCA0LjU2NiAzLjk2cy0xLjM5MiA0LjgyOS43NyA3LjExNSIvPjwvc3ZnPg=="}, {"id": "D03", "phase": "main", "article": "der", "german": "Regenschirm", "fullGerman": "der Regenschirm", "korean": "우산", "level": "A1", "deSyllables": 3, "koSyllables": 2, "isCompound": true, "firstLetter": "R", "iconId": "fluent-emoji-high-contrast:umbrella", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xNi45OCAzYTEgMSAwIDEgMC0yIDB2LjAzNEM3Ljc5MiAzLjUzNyAyLjExNSA5LjQ3MSAyIDE2Ljc1YzAgLjEyLjEuMjIuMjIuMjJjLjA4IDAgLjE2LS4wNS4xOS0uMTJhMy41IDMuNSAwIDAgMSAzLjA5LTEuODdjMS4yOCAwIDIuNC43IDMgMS43M2MuMS4xNi4yNy4yNi40Ni4yNmguMDZjLjE5IDAgLjM2LS4xLjQ2LS4yNmEzLjQ5IDMuNDkgMCAwIDEgMy0xLjczYy45ODEgMCAxLjg2OS40MTIgMi41IDEuMDY4VjI2LjVjMCAuODE4LS42NTIgMS40Ny0xLjQ3IDEuNDdhMS40NyAxLjQ3IDAgMCAxLTEuNDctMS40N2ExIDEgMCAxIDAtMiAwYzAgMS45MSAxLjU0NSAzLjQ3IDMuNDcgMy40N2EzLjQ2MyAzLjQ2MyAwIDAgMCAzLjQ3LTMuNDdWMTYuMDMyYTMuNDUgMy40NSAwIDAgMSAyLjQ4LTEuMDUyYzEuMjggMCAyLjQuNyAzIDEuNzNjLjEuMTYuMjcuMjYuNDYuMjZoLjA2Yy4xOSAwIC4zNi0uMS40Ni0uMjZhMy40OSAzLjQ5IDAgMCAxIDMtMS43M2MxLjM0IDAgMi41Ljc2IDMuMDggMS44OGMuMDQuMDcuMTEuMTIuMTkuMTJjLjEyIDAgLjIyLS4xLjIyLS4yMmMtLjA5Ni03LjI4Mi01Ljc3LTEzLjIxMi0xMi45NS0xMy43MjR6Ii8+PC9zdmc+"}, {"id": "D04", "phase": "main", "article": "der", "german": "Bleistift", "fullGerman": "der Bleistift", "korean": "연필", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": true, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:pencil", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yNS44MTIgMS4yMzdhMyAzIDAgMCAwLTQuMjQzIDBMMS41OTEgMjEuMjE1YTEgMSAwIDAgMC0uMjgyLjU2TC4wNzQgMzAuMDgyYTEgMSAwIDAgMCAxLjEzNiAxLjEzNmw4LjMwNy0xLjIzNmExIDEgMCAwIDAgLjU2LS4yODJMMzAuMDU0IDkuNzIzYTMgMyAwIDAgMCAwLTQuMjQzem0tNS45MiA0LjUwNmw1LjY1NiA1LjY1N2wtMi4xIDIuMWwtNS42NTctNS42NTd6bTIuODUgOC40NjRMOS4zNDYgMjcuNjAyTDMuNjkgMjEuOTQ1TDE3LjA4NCA4LjU1ek04LjQ0OCAyOC4xMmwtNC4zNTcuNjQ4TDIuNTI0IDI3LjJsLjY0OS00LjM1OHoiLz48L3N2Zz4="}, {"id": "D05", "phase": "main", "article": "der", "german": "Brief", "fullGerman": "der Brief", "korean": "편지", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:envelope", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xIDcuMDFDMSA1Ljg5OCAxLjg5OCA1IDMuMDEgNUgyOWMxLjEwOSAwIDIgLjkwNCAyIDIuMDFWMjVjMCAxLjEwOS0uOTA0IDItMi4wMSAySDMuMDFBMi4wMDcgMi4wMDcgMCAwIDEgMSAyNC45OXptMi0uMDA1di40OTdsMTIuMzI2IDcuODU0Yy40MTMuMjYyLjkzNS4yNjIgMS4zNDggMEwyOSA3LjUxdi0uNTA4TDI4Ljk5NiA3SDMuMDA1bC0uMDAzLjAwMnptMjYgMi44NzdsLTEwLjA0NyA2LjM5NEwyOSAyMi42NzF6bS0xMi4wMSA3LjUxNmEzLjI1IDMuMjUgMCAwIDEtMS45OCAwTDMuMDggMjVoMjUuODU1em0tMy45NDEtMS4xMjJMMyA5Ljg3M1YyMi42OHoiLz48L3N2Zz4="}, {"id": "D06", "phase": "main", "article": "der", "german": "Zug", "fullGerman": "der Zug", "korean": "기차", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "Z", "iconId": "fluent-emoji-high-contrast:locomotive", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xOSAyNmEyIDIgMCAxIDEgNCAwYTIgMiAwIDAgMS00IDBtOCAyYTIgMiAwIDEgMCAwLTRhMiAyIDAgMCAwIDAgNCIvPjxwYXRoIGQ9Ik00LjAyNyAyMy4xNTNWMjFINHYtLjA4MmEzLjUgMy41IDAgMCAxIC4wODctNC45MjlhNC43NyA0Ljc3IDAgMCAxIDIuNTkxLTMuNWwtLjY0NS0uNjU1QTMuNCAzLjQgMCAwIDEgNS4wMjcgOS40MVY0YTMgMyAwIDAgMSAzLTNoNy45OTlhMyAzIDAgMCAxIDMgM3YuNDQ0YTMuNyAzLjcgMCAwIDEgMS43NS0uNDM0aDYuNDlhMy43NTQgMy43NTQgMCAwIDEgMy43NSAzLjc1VjIwaC4wMXYzLjAzN0E1IDUgMCAwIDEgMjQgMzBhNSA1IDAgMCAxLTYgMGgtLjM1NmEzLjk5IDMuOTkgMCAwIDEtNC42NDQuNDYyYTQgNCAwIDAgMS0xLjk3My41MzhoLTguM0EyLjcyNCAyLjcyNCAwIDAgMSAuODEgMjYuMzM4ek0xNi4wMjcgM2gtOGExIDEgMCAwIDAtMSAxdjJoMTBWNGExIDEgMCAwIDAtMS0xbTEgNWgtMTB2MS40MWExLjQyIDEuNDIgMCAwIDAgLjQyIDEuMDFMOSAxMnYxaDYuMDI3di0xbDEuNTgtMS41OGExLjQyIDEuNDIgMCAwIDAgLjQyLTEuMDF6bS04LjI1NCA2YTIuNzUgMi43NSAwIDAgMC0yLjc0NiAyLjc1di4zMzVsLS4wMjcuMDFhMS41MDEgMS41MDEgMCAwIDAgMCAyLjgxbC4wMjcuMDFWMjBoMTN2LTZ6bS0yLjc0NiA3djIuOTlsLTMuODEgMy43N2EuNzI0LjcyNCAwIDAgMCAuNTEgMS4yNEg4di0yYTMgMyAwIDAgMSAzLTNoNi41MzVBMy45OTggMy45OTggMCAwIDEgMjQgMjMuMzU0QTQgNCAwIDAgMSAyNyAyMmMuNzQgMCAxLjQzMy4yIDIuMDI3LjU1VjIyaC0uMDF2LTF6bTE4LjU1NyA2Ljc3OWwuMDIxLjAyOGEzIDMgMCAwIDAgMS4xMjguOTExQTMgMyAwIDEgMCAyNCAyNmEzIDMgMCAwIDAtLjc0Ni0xLjk4QTMgMyAwIDAgMCAyMSAyM2EzIDMgMCAwIDAtMi4yMzYgMWEzIDMgMCAwIDAtLjc1IDIuMjg1QTMgMyAwIDAgMCAyNCAyNmMtLjAwMS42NjYuMjE2IDEuMjguNTgzIDEuNzc5TTE3IDI3YTIgMiAwIDAgMC0zLjczMi0xSDE1Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxaC0xLjczMkEyIDIgMCAwIDAgMTcgMjdtLTggMGwuMDAxLjA2OGEyIDIgMCAwIDAgMy43My45MzJIMTFjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTFoMS43MzJBMS45OSAxLjk5IDAgMCAwIDExIDI1YTIgMiAwIDAgMC0yIDJNMjcuMDI3IDguOWMwLS41LS40LS45LS45LS45aC00LjJjLS41IDAtLjkuNC0uOS45djQuMmMwIC41LjQuOS45LjloNC4yYy40OSAwIC45LS40LjktLjl6Ii8+PC9nPjwvc3ZnPg=="}, {"id": "D07", "phase": "main", "article": "der", "german": "Baum", "fullGerman": "der Baum", "korean": "나무", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:deciduous-tree", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yNi41IDEyLjY3YzAgLjkxLS4yMiAxLjc3LS42IDIuNTNjMS4yNi45NCAyLjEgMi40MyAyLjEgNC4xMmMwIDIuODQtMi4zMiA1LjE2LTUuMTYgNS4xNkgxOXY2LjU0aC02di02LjU0aC0yLjg0QzcuMzIgMjQuNDggNSAyMi4xNiA1IDE5LjMyYzAtMS42OS44NC0zLjE4IDIuMS00LjEyYTUuNjYyIDUuNjYyIDAgMCAxIDQuNC04LjE2VjdjMC0yLjc2IDIuMjQtNSA1LTVzNSAyLjI0IDUgNXYuMDRjMi44MS4zMyA1IDIuNzIgNSA1LjYzTTE1IDI0LjQ4djQuNTRoMnYtNC41NHoiLz48L3N2Zz4="}, {"id": "D08", "phase": "main", "article": "der", "german": "Vogel", "fullGerman": "der Vogel", "korean": "새", "level": "A1", "deSyllables": 2, "koSyllables": 1, "isCompound": false, "firstLetter": "V", "iconId": "fluent-emoji-high-contrast:bird", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xMC4wMjggOS44OWExIDEgMCAxIDAgMC0yYTEgMSAwIDAgMCAwIDIiLz48cGF0aCBkPSJtMjUuMjI2IDI2bC0uMDAzLS4wMWgzLjg5NWMuOTUyIDAgMS43Mi0uNzY4IDEuNzItMS43MnYtOS4xNWMwLTEuMjY0LTEuMzE4LTIuMDc2LTIuNDQ3LTEuNTZsLTYuMzMgMi45NUwxOS44ODggMTBoLS4wMDVsLTEuMzYyLTQuMDhhMy4zMjYgMy4zMjYgMCAwIDAgMi40NzYtMy4yMmMwLS45MzItLjc2OC0xLjctMS43LTEuN2gtNy40NmMtMy4yODIgMC02LjAzIDIuMjYyLTYuNzkzIDUuMzA3TDIuMDQgNy44ODJsLS4wMDIuMDAxQzEuMDY3IDguMzk2LjkgOS43MDIgMS42OCAxMC40NTZsMi41NTMgMi40MTdsLS42NyA1LjgwM0MzLjExOCAyMi41NzggNi4xNiAyNiAxMC4wODkgMjZoLjY5bC0uNSAyLjVoLTEuOGMtLjczIDAtMS4zMy41Mi0xLjQ3IDEuMjFjLS4wNC4xNS4wOS4yOS4yNC4yOWgxMi41M2MuMTYgMCAuMjgtLjE0LjI1LS4yOWExLjUxIDEuNTEgMCAwIDAtMS40Ny0xLjIxaC0xLjc4bC41LTIuNXpNNi44NDYgNy42NzdBNS4wMSA1LjAxIDAgMCAxIDExLjgzOCAzaDcuMTI3YTEuMzI1IDEuMzI1IDAgMCAxLTEuMjk3IDEuMDNIMTUuMjlsLjg5OSAxLjUxMXEuMjYuNDM5LjQyNC45NzVsLjAwMy4wMUwxOC40NDQgMTJoLjAwNGwyLjQyNCA3LjI3bC4wMDctLjAwNGwxLjMwNyAzLjkxNkgxOS4yOWE2LjU3IDYuNTcgMCAwIDEtNi41Ny02LjU3YS41LjUgMCAxIDAtMSAwQTcuNTcgNy41NyAwIDAgMCAxNy42MyAyNGgtNy41NDJhNC41NjggNC41NjggMCAwIDEtNC41MzYtNS4wOTZMNi44NDQgNy43MDF6TTIzLjUwOSAyMy45OWwtMS43MTctNS4xNWw3LjA0Ni0zLjI4djguNDN6TTE1Ljc4IDI2bC0uNSAyLjVoLTMuNTAxbC41LTIuNXpNNC4yMjMgMTAuMTFsLS43NTgtLjcxN2wuODk3LS40N3oiLz48L2c+PC9zdmc+"}, {"id": "D09", "phase": "main", "article": "der", "german": "Hund", "fullGerman": "der Hund", "korean": "개", "level": "A1", "deSyllables": 1, "koSyllables": 1, "isCompound": false, "firstLetter": "H", "iconId": "fluent-emoji-high-contrast:dog", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik02Ljc1IDExLjQ4MmMwIC40MDUuMzMuNzUuNzUuNzVzLjc1LS4zNDUuNzUtLjc1di0uODU1YzAtLjQyLS4zMy0uNzUtLjc1LS43NXMtLjc1LjMzLS43NS43NXoiLz48cGF0aCBkPSJNMjQuNjIgNWE1LjUwNiA1LjUwNiAwIDAgMC01LjU3IDQuNzJjLS4wMi4xNS4xLjI4LjI1LjI4aC4yNmMuNzYgMCAxLjQ4LS40MiAxLjgzLTEuMWMuNi0xLjE4IDEuODUtMS45NyAzLjI4LTEuOWMxLjc4LjA4IDMuMjMgMS41MiAzLjMzIDMuMzFhMy41IDMuNSAwIDAgMS0xLjA4NCAyLjcyMmE1LjIgNS4yIDAgMCAwLTQuNTc4LTIuMDE0bC02LjgyLjg0aC0uMDA2YS45LjkgMCAwIDEtLjQzNy0uMDM0YS43LjcgMCAwIDEtLjI1NC0uMTgyYTEuNCAxLjQgMCAwIDEtLjE2Mi0uMjE4bC4wMDQtLjAxNmwuNjU5LTIuNjIydi0uMDAxQTIuMjM4IDIuMjM4IDAgMCAwIDEzLjE1MiA2SDkuMDJBNC44NyA0Ljg3IDAgMCAwIDQuMyA5LjY4N0w0LjIyMiAxMEgyLjc2QTEuNzYgMS43NiAwIDAgMCAxIDExLjc2VjEyYTMuOTkgMy45OSAwIDAgMCAxLjUwNCAzLjEyOGExIDEgMCAwIDAtLjAwNC4xMXYuNTEyYzAgLjY4Ni41NjQgMS4yNSAxLjI1IDEuMjVjLjYgMCAxLjEwOC0uNDMyIDEuMjI1LTFINnYxLjE5YzAgMS43NTkuNTk5IDMuNDUyIDEuNjgzIDQuODFBMy43MDQgMy43MDQgMCAwIDAgNCAyNS43MXYuNjdjMCAuOTAzLjczOCAxLjYyIDEuNjMgMS42MmgxLjc1Yy42NzMgMCAxLjI1Mi0uNDE0IDEuNDk2LTFoLjI5NGEzLjgyIDMuODIgMCAwIDAgMy44MDYtMy4zOTNMMTQgMjkuNzRjLjAzLjE1LjE2LjI2LjMxLjI2aDIuNDRjLjE1IDAgLjI3LS4xNC4yNS0uMjlMMTUuODc1IDIzaDIuOTY1cS4zMzggMCAuNjctLjAzNkwxOCAyOS42OWMtLjA0LjE2LjA4LjMuMjQuM2gyLjQ0Yy4xNSAwIC4yNy0uMS4zLS4yNGwxLjAyMy00LjQ0Yy4yODcuMjIxLjYxNC40MS45ODYuNTU5aC4wMDJsMi4wMTkuODA4djIuMDEzYzAgLjcyMi41ODggMS4zMSAxLjMxIDEuMzFoMi4zOGMuNzIyIDAgMS4zMS0uNTg4IDEuMzEtMS4zMXYtNC44N2EyLjYgMi42IDAgMCAwLTEuMTQtMi4xMWwtLjg3LS41NzlWMTYuMjJjMC0uNDYzLS4wNi0uOTEyLS4xNzMtMS4zMzlBNS40OSA1LjQ5IDAgMCAwIDMwIDEwLjM0MWMtLjA4LTIuOTEtMi40Ny01LjI4LTUuMzgtNS4zNE02LjI0IDEwLjE3MmEyLjg3IDIuODcgMCAwIDEgMi40MzQtMi4xNTFsLjYyOSAzLjM2M2wuMDA4LjAzYTIuNzY1IDIuNzY1IDAgMCAwIDQuMTI4IDEuNjc1Yy41MjguNTI2IDEuMjk4Ljg4NSAyLjMyNi43NTNoLjAwM2w2Ljc5LS44MzdBMy4yMiAzLjIyIDAgMCAxIDI2IDE2LjIydjUuMjhjMCAuNDUuMjMyLjg2My41OTMgMS4wOTdsMS4xNTguNzcybC4wMDIuMDAxYS42MS42MSAwIDAgMSAuMjU3LjQ4MlYyOGgtMXYtMS43OWMwLS41Ny0uMzU3LTEuMDIyLS44MTUtMS4yMTNsLS4wMTQtLjAwNmwtMi40NS0uOThoLS4wMDJjLS44OTYtLjM1Ni0xLjM5OC0xLjI0Ni0xLjcyOS0yLjYwOHYtLjAzN2MwLTEuMy0uOS0yLjUyMi0yLjItMi41MjJIMTF2NC4zMjZBMS44MiAxLjgyIDAgMCAxIDkuMTcgMjVIOGExIDEgMCAwIDAtMSAxSDZ2LS4yOWMwLS45NS43NjUtMS43MSAxLjctMS43MUg5YTEgMSAwIDAgMCAxLTF2LTEuMDNhMSAxIDAgMCAwLS4yOTgtLjcxM0E1LjcgNS43IDAgMCAxIDggMTcuMTl2LTEuODhDOCAxNC41ODggNy40MTIgMTQgNi42OSAxNEg1YTIgMiAwIDAgMS0xLjg3LTEuMjg3Yy4xMS4wNjMuMjM2LjEuMzcuMUg0YS43NTUuNzU1IDAgMCAwIC43NC0uODdhMS45MyAxLjkzIDAgMCAwIDEuNDExLTEuNDE1em0xNC4zMyAxMC40NDVhNCA0IDAgMCAxLTEuNzMuMzgzSDEydi0xLjE1Nmg3LjhjLjM4NiAwIC43ODEuMjU4IDEuMDA4LjY5NWExIDEgMCAwIDAtLjIzOC4wNzhNMTAuNzA1IDhoMi40NDhjLjE1NCAwIC4yNjcuMTQ4LjIzLjI5NHYuMDAybC0uNjYxIDIuNjNsLS4wMDMuMDFhLjc0Ni43NDYgMCAwIDEtLjczMy41NjRhLjc2NS43NjUgMCAwIDEtLjczLS41NTN6Ii8+PC9nPjwvc3ZnPg=="}, {"id": "D10", "phase": "main", "article": "der", "german": "Berg", "fullGerman": "der Berg", "korean": "산", "level": "A1", "deSyllables": 1, "koSyllables": 1, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:mountain", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0zMC4wMDcgMTUuMDQybC02Ljc5LTYuNzQ4aC4wMDdhMzU5IDM1OSAwIDAgMS0zLjI1Ni0zLjI1NmMtMS4zMTItMS4zNC0zLjI3NS0xLjQ3Mi00LjczOCAwYy0uODQyLjg0OC0xLjkwNyAxLjkxNi0yLjY4MyAyLjY5MmwtLjI5Mi4yOTJsLS4yNjIuMjZjLS45MDcuOTA3LTEuNTMzIDEuNTMyLTMuMDAxIDEuNTM2di4wMTNjLS40MTUuMDEtLjgzLjAzLTEuMDAyLjA2NWMtLjYyOC4xMjgtMS4yOTcuNDY1LTIuMDIyIDEuMzQ0Yy0uODk4IDEuMDktMy4wMTUgMy42Mi0zLjk2MSA0Ljc0OHY1LjQ2N0wyIDIxLjQ1N3Y4LjUzOWgyOFYyMi40NmguMDA3em0tMTYuNS02Ljg1OGMuNzQ0LS43NDUgMS42NzctMS42ODEgMi40MzItMi40NGMuNTU2LS41NiAxLjE1NS0uNzcxIDEuNjk3LS43NmMuNTUuMDEgMS4xMjUuMjUyIDEuNjE3Ljc1NGMuNDY4LjQ3OCAxLjAzNSAxLjA0OCAxLjU3OCAxLjU5YTcuMyA3LjMgMCAwIDAtMS44OC42NmMtLjU2NC4zLTEuNTk0Ljc5OC0yLjg5Ljc5OGMtLjg5OCAwLTEuNjY2LS4yMTQtMi41NTQtLjYwMm02LjI0MiAxNi44NGwuMzc5LjAwMmMzLjA2My0uMDIzIDYuMDc3LS45MTQgOC44NzItMi4wNTJ2Ni4wMjJIM3YtNi43MzlxLjE1OS0uMDMuMzI0LS4wNThjLjkzMy0uMTUgMS45ODktLjIyIDMuMTgxLS4xMzdjMS4yMy4wOTUgMi42MTcuMzY0IDQuMTgyLjkwNGwuNzQyLjI1NmMzLjM0MiAxLjE1NyA1LjExNiAxLjc3MiA4LjMyIDEuODAzbS4zNzItLjk5OGExNCAxNCAwIDAgMS0uMzYtLjAwMWMtMi44NTUtLjAyOC00LjM2Mi0uNTQ1LTcuNzA0LTEuNzAybC0uNzE5LS4yNDhjLTEuNzcxLS42MS0zLjM1MS0uOTExLTQuNzU5LTEuMDFhMTQgMTQgMCAwIDAtMy41NzIuMTcydi00Ljg4NWMxLjAyNS0xLjIyNCAyLjktMy40NjUgMy43MzMtNC40NzZjLjQ3LS41Ny44NTctLjgwNiAxLjE2NS0uOTJxLjA0LS4wMTUuMDgtLjAyN2wuMDAzLjczM3YuMDA2Yy4wMDIuMzk3LjAwNC44MzMuMDA0IDEuMzM5YzAgMS4wNS4zMDIgMi4wODMuOTM1IDIuODc2Yy42NDkuODEzIDEuNjE0IDEuMzI3IDIuNzg5IDEuMzI3YzEuMjg1IDAgMi40NDguNjY2IDMuNDA1IDEuNjM0bDUuMTU4IDUuMTh6Ii8+PC9zdmc+"}, {"id": "D11", "phase": "main", "article": "der", "german": "Spiegel", "fullGerman": "der Spiegel", "korean": "거울", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "S", "iconId": "fluent-emoji-high-contrast:mirror", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xNiAyNy4xNWMzLjczMyAwIDYuNzYtNC44NjcgNi43Ni0xMC44N1MxOS43MzMgNS40MSAxNiA1LjQxcy02Ljc2IDQuODY3LTYuNzYgMTAuODdTMTIuMjY3IDI3LjE1IDE2IDI3LjE1bTUuNzYtMTAuODdjMCAyLjg0NS0uNzIgNS4zNzMtMS44MyA3LjE1OGMtMS4xMTggMS44LTIuNTM1IDIuNzEyLTMuOTMgMi43MTJzLTIuODEyLS45MTItMy45My0yLjcxMmExMSAxMSAwIDAgMS0xLjAyNC0yLjE3Mmw5Ljg1LTEwLjEzNGMuNTQzIDEuNDkuODY0IDMuMjQ5Ljg2NCA1LjE0OCIvPjxwYXRoIGQ9Ik0xNiAxYTUuNjcgNS42NyAwIDAgMC00LjcxOSAyLjUyNWwtMS4wMjQgMS41MzZhMyAzIDAgMCAxLTEuMTU0IDEuMDJsLTEuNTgzLjc5YTUgNSAwIDAgMC0yLjMwMyA2LjU2OGwuNjAxIDEuMzA0YTMgMyAwIDAgMSAwIDIuNTE0bC0uNjAxIDEuMzA0YTUgNSAwIDAgMCAyLjMwMyA2LjU2N2wxLjU4My43OTFhMyAzIDAgMCAxIDEuMTU0IDEuMDJsMS4wMjQgMS41MzZhNS42NyA1LjY3IDAgMCAwIDkuNDM4IDBsMS4wMjQtMS41MzZhMyAzIDAgMCAxIDEuMTU0LTEuMDJsMS41ODMtLjc5YTUgNSAwIDAgMCAyLjMwMy02LjU2OGwtLjYwMi0xLjMwNGEzIDMgMCAwIDEgMC0yLjUxNGwuNjAyLTEuMzA0YTUgNSAwIDAgMC0yLjMwMy02LjU2N2wtMS41ODMtLjc5MWEzIDMgMCAwIDEtMS4xNTQtMS4wMmwtMS4wMjQtMS41MzZBNS42NyA1LjY3IDAgMCAwIDE1Ljk5OSAxbS0zLjA1NSAzLjYzNWEzLjY3IDMuNjcgMCAwIDEgNi4xMSAwbDEuMDI0IDEuNTM2YTUgNSAwIDAgMCAxLjkyNCAxLjY5OGwxLjU4Mi43OTJhMyAzIDAgMCAxIDEuMzgyIDMuOTRsLS42MDEgMS4zMDRhNSA1IDAgMCAwIDAgNC4xOWwuNjAxIDEuMzA0YTMgMyAwIDAgMS0xLjM4MiAzLjk0bC0xLjU4Mi43OTJhNSA1IDAgMCAwLTEuOTI0IDEuNjk4bC0xLjAyNCAxLjUzNmEzLjY3IDMuNjcgMCAwIDEtNi4xMSAwbC0xLjAyNC0xLjUzNmE1IDUgMCAwIDAtMS45MjQtMS42OThsLTEuNTgyLS43OTJhMyAzIDAgMCAxLTEuMzgyLTMuOTRsLjYwMS0xLjMwNGE1IDUgMCAwIDAgMC00LjE5bC0uNi0xLjMwNWEzIDMgMCAwIDEgMS4zODItMy45NGwxLjU4Mi0uNzkyYTUgNSAwIDAgMCAxLjkyNC0xLjY5OHoiLz48L2c+PC9zdmc+"}, {"id": "D12", "phase": "main", "article": "der", "german": "Handschuh", "fullGerman": "der Handschuh", "korean": "장갑", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": true, "firstLetter": "H", "iconId": "fluent-emoji-high-contrast:gloves", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yNi4yNTIgMjYuNjI5YTQuNSA0LjUgMCAwIDEtMS43MDkgMS4yODVsLTguNjg3IDMuNjkzQTQuNDc0IDQuNDc0IDAgMCAxIDEwIDI5LjIzN2wtMS42OTQtMy45NjFsLS4wMi4wMWwtMy44MzktOS4wMmwtMi4wNzMtNC4xMzZBMy41OCAzLjU4IDAgMCAxIDQuNTU4IDcuMUEzLjU4NSAzLjU4NSAwIDAgMSA2Ljc3IDMuNjAzYTMuNSAzLjUgMCAwIDEgMS4zNC0uMjY2aC4xcS4wNS0uMTMuMTExLS4yNTRhMy41MyAzLjUzIDAgMCAxIDIuMDg5LTEuODJhMy41IDMuNSAwIDAgMSAxLjEtLjE4bC0uMDAxLjAwNmEzLjYgMy42IDAgMCAxIDEuODYuNTIzYTIuNiAyLjYgMCAwIDEgLjk5OC0uNTIzYTIuNTMgMi41MyAwIDAgMSAyLjM0OC41NTNjLjM0NC4xMDYuNjcyLjI2Mi45NzMuNDY2Yy4yNTUtLjE3Ni41NDYtLjMwOS44NjYtLjM4NmguMDAzYzEuNDItLjMzOSAyLjc1Mi42MDQgMy4wOTggMS45MDR2LjAwMmwuOTg3IDMuNjc3YTMuNiAzLjYgMCAwIDEgMi4xNTguMjQxcS40MTYuMTg5Ljc2OC40NjhhMi41OCAyLjU4IDAgMCAxIDIuMDQxLjE1MmMxLjMyNS42ODggMS42ODIgMi4yMjYgMS4xNiAzLjQ1bC0uMDA0LjAwOWwtLjAwNC4wMDhjLTEuMjMgMi43NDMtMS44NyA0LjQxMy0xLjk1NSA1LjYwMnYuMDA5bC0uMDAxLjAwOHEtLjAyLjI2LS4wNDguNTQ0bDEuNTY2IDQuNDI5YTMuNDcgMy40NyAwIDAgMS0yLjA3MSA0LjQwNG0tMS40Ni0xNi40NDRhMS42NSAxLjY1IDAgMCAwLS44MDItLjgxMWExLjU5NCAxLjU5NCAwIDAgMC0yLjExLjgybC0xLjYgMy43M3YtLjAwMmwtLjAwMi4wMDJsLS44NC0yLjY0cS0uMDE1LS4xMi0uMDYtLjI0bC0yLjE3LTYuNDNhMS43IDEuNyAwIDAgMC0uNjg0LS44NzhhMS42NiAxLjY2IDAgMCAwLS44MzktLjI1N2ExLjUgMS41IDAgMCAwLS40NDUuMDY1YTEuNTc1IDEuNTc1IDAgMCAwLTEuMDQgMi4wMWwxLjkzOCA1Ljc0bC0uNC4xN2wtMi43LTcuMjlhMS43IDEuNyAwIDAgMC0uNjA2LS43ODhhMS42NiAxLjY2IDAgMCAwLS44OTgtLjI5OEExLjU3NCAxLjU3NCAwIDAgMCAxMC4wNDggNS4ybDIuNzcyIDcuNDc0bC0uMy4xMmgtLjAwMmwtMi45Mi02LjQ3YTEuNjYgMS42NiAwIDAgMC0xLjQ5LS45ODVjLS4xOTggMC0uMzk1LjA0LS41NzguMTE1YTEuNTc0IDEuNTc0IDAgMCAwLS44MyAyLjExbDIuOTE4IDYuNDQ2aC0uMDAxbC4wMDEuMDA0bC0uNDMuMThsLTIuMi00LjM5YTEuNTYgMS41NiAwIDAgMC0uODU2LS43NnYtLjAwMmExLjYgMS42IDAgMCAwLTEuMjYyLjA3MmExLjU4IDEuNTggMCAwIDAtLjcgMi4xMmwyLjEgNC4xOWwzLjAzIDcuMTJsLjAyLS4wMWwxLjQ1OCAzLjQyNmwxMy4yMTQtNS42MTdsLjMzMy43ODJsLTEuNDguNjNsMS42MzcgMy44NDhxLjA5LS4wODUuMTcyLS4xNzljLjYtLjY5Ljc5NC0xLjY4OC40MTQtMi41OWwtMS45My00LjUzYy4wMS0uMjUuMDItLjUuMDItLjc2Yy4wMS0xLjQxLjYyLTMuMjggMS42Ni02LjA2Yy4xNi0uNDQuMTQ0LS45MDUtLjAyNi0xLjNtLTEuMDM0IDE1Ljg4OWwtMS42OTYtMy45ODdsLTEuMTA3LjQ3bDEuNjg5IDMuOTl6bS0xLjg5Ni44MDZsLTEuNjktMy45OWwtMS4xMTcuNDc1bDEuNjk5IDMuOTg2em0tMS44OS44MDRsLTEuNy0zLjk4NmwtMS4xMTguNDc1bDEuNzA0IDMuOTg0em0tMS44OTYuODA2bC0xLjcwNC0zLjk4NGwtMS4xMTYuNDc0bDEuNjk0IDMuOTg4em0tMS45MDguODFsLTEuNjk0LTMuOTg3bC0xLjExLjQ3MmwxLjY5MSAzLjk4OGwuMDIzLS4wMXptLTMuNTg3LTMuMTgzbC0xLjQ3LjYyNWwuNzI5IDEuNzEyYTIuNDc1IDIuNDc1IDAgMCAwIDIuMzcgMS41MDN6Ii8+PC9zdmc+"}, {"id": "F01", "phase": "main", "article": "die", "german": "Brille", "fullGerman": "die Brille", "korean": "안경", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:glasses", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0yNS43NzMgMTUuOWMxLjAxNC0uMzQ0IDEuNDk5LTEuNDczIDEuMDcyLTIuNTE4Yy0uNDI3LTEuMDU1LTEuNjAzLTEuNjMtMi42MTctMS4yODVzLTEuNSAxLjQ3My0xLjA3MyAyLjUxOWMuNDI3IDEuMDQ1IDEuNjAzIDEuNjMgMi42MTcgMS4yODVtLTEyLjkyNy0yLjUxNWMuNDI2IDEuMDQ1LS4wNTggMi4xNzQtMS4wNzIgMi41MTljLTEuMDE1LjMzNC0yLjE5MS0uMjQtMi42MTgtMS4yODZjLS40MjYtMS4wNDUuMDU4LTIuMTg0IDEuMDcyLTIuNTE5YzEuMDE1LS4zNDUgMi4xOTEuMjMgMi42MTggMS4yODYiLz48cGF0aCBkPSJNMzAuMDEgMTUuNjJ2LS42MTZoLjAwM1YxM2MwLS4wNDEuMDA1LS4wNi4wMDYtLjA2NWwuMDA4LS4wMThsLjA1MS0uMDY3Yy4wMzQtLjAzOC4wNzMtLjA3OS4xMzktLjE0NWwuMDE5LS4wMmMuMjYyLS4yNjUuNzU2LS43NjQuNzY0LTEuNjY3di0uMDI0QTEuOTk3IDEuOTk3IDAgMCAwIDI5LjAxIDloLTkuMDJxLS4xNjQgMC0uMzIzLjAyNmE0LjAyIDQuMDIgMCAwIDAtMi40MTQgMS4yMTJjLS4wODguMDg0LS4xNy4xNjYtLjI0LjIzNmwtLjAwNC4wMDRjLS4yMjkuMjI4LS4zNDQuMzM2LS40NzMuNDFjLS4xLjA1Ny0uMjQ3LjExNi0uNTMzLjExNmMtLjMwNSAwLS40NTMtLjA2LS41NDctLjExNGMtLjEyNS0uMDctLjIzNy0uMTc1LS40NzEtLjQxMWwtLjAwNS0uMDA1Yy0uMDc3LS4wNzctLjE2Ny0uMTY5LS4yNjctLjI2M2E0IDQgMCAwIDAtMi4zNjUtMS4xODJBMiAyIDAgMCAwIDEyLjAxIDlIMi45OUMxLjg4IDkgMSA5LjkxIDEgMTAuOTk5VjExYzAgLjkxNy41MSAxLjQyNC43NzggMS42OWwuMDIuMDJjLjA2OC4wNjcuMTA5LjEwOC4xNDQuMTQ4YS41LjUgMCAwIDEgLjA2Mi4wODdhLjIuMiAwIDAgMSAuMDA2LjA2M3YuMTI3YTUgNSAwIDAgMC0uMDA2LjI0NXYyLjI0YzAgMy40MTggMi41NyA2LjM3IDUuOTMzIDYuMzdIOS45MWMzLjQzIDAgNi4wOS0zLjAwNSA2LjA5LTYuNTJjMCAzLjUxNSAyLjY1NCA2LjUxIDYuMDg3IDYuNTFoMS45NzVjMy4zNDggMCA1Ljk0OC0yLjkyMyA1Ljk0OC02LjM2bS0yLjAwNy0uMDFjMCAyLjQtMS43MzUgNC4zOTUtMy45NSA0LjM5NWgtMS45NzZjLTIuMjkgMC00LjA3LTIuMDU1LTQuMDctNC41NDV2LTIuMDhjLjAwOC0xLjMxLjkwNC0yLjM4IDIuMTEzLTIuMzhoNS43NmMxLjIxIDAgMi4xMjMgMS4wNyAyLjEyMyAyLjM4ek05LjkxIDIwLjAwNEg3Ljk0NmMtMi4yMTMgMC0zLjk0My0xLjk4NC0zLjk0My00LjM4NHYtMi4yNGMwLTEuMzEuOTEtMi4zOCAyLjExNy0yLjM4aDUuNzYzYzEuMjA4IDAgMi4xMjMgMS4wNyAyLjEyMyAyLjM4djIuMDljMCAyLjQ4LTEuOCA0LjUzNC00LjA5NiA0LjUzNCIvPjwvZz48L3N2Zz4="}, {"id": "F02", "phase": "main", "article": "die", "german": "Tasche", "fullGerman": "die Tasche", "korean": "가방", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "T", "iconId": "fluent-emoji-high-contrast:handbag", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yNC42NCA5LjM2aDEuMDJhMy45MzcgMy45MzcgMCAwIDEgMy45IDMuNWwxLjQzIDEzLjYyYTMuOTE2IDMuOTE2IDAgMCAxLTMuODkgNC4zMkg0LjkyNmEzLjkyIDMuOTIgMCAwIDEtMy44OTQtNC4zMjRsMS40MjktMTMuNjFhMy45MTYgMy45MTYgMCAwIDEgMy45LTMuNTA2aC45NEM3Ljk4NSA1LjE4OSAxMS42MDQgMiAxNS45NjcgMnM3Ljk4OSAzLjE5NiA4LjY3NCA3LjM2bS4xMTYgMy40MmguMTVjLjYxIDAgMS4xLjQ5IDEuMTEgMS4xdjEuODFjMCAuNjEtLjQ5IDEuMS0xLjEgMS4xaC0xLjgxYy0uNjEgMC0xLjEtLjQ5LTEuMS0xLjF2LTEuODFjMC0uNjEuNDktMS4xIDEuMS0xLjFoLjE2di0xLjQySDguNjg2djEuNDJoLjE1Yy42MSAwIDEuMS40OSAxLjEgMS4xdjEuODFjMCAuNjEtLjQ5IDEuMS0xLjEgMS4xaC0xLjgxYy0uNjEgMC0xLjEtLjQ5LTEuMS0xLjF2LTEuODFjMC0uNjEuNDktMS4xIDEuMS0xLjFoLjE2di0xLjQyaC0uODNhMS45MiAxLjkyIDAgMCAwLTEuOTA2IDEuNzE4bC0uOTEgOC42NzJoMjQuOTQybC0uOTEyLTguNjc1YTEuOTMzIDEuOTMzIDAgMCAwLTEuOTE2LTEuNzE1aC0uODk4em0tMS42My0zLjQyYy0uNjY3LTMuMzM4LTMuNjItNS44Ni03LjE1LTUuODZzLTYuNDgzIDIuNTIyLTcuMTUgNS44NnoiLz48L3N2Zz4="}, {"id": "F03", "phase": "main", "article": "die", "german": "Zwiebel", "fullGerman": "die Zwiebel", "korean": "양파", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "Z", "iconId": "fluent-emoji-high-contrast:onion", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMi43NCAyLjQ1OGMwLTEuMzMzIDEuNjU4LTEuOTgxIDIuNTUzLS45NTlsMS4xODIgMS4zNTRMMTcuNjU3IDEuNWMuODk1LTEuMDIzIDIuNTUzLS4zNzUgMi41NTMuOTU4djEuODNjMCAuNzM4LjQ0IDEuNDA1IDEuMTM2IDEuNzEyYzQuNDY0IDEuODkyIDcuNjA0IDYuMzI1IDcuNjA0IDExLjQ4OGMwIDYuMDc2LTQuMzQ5IDExLjE0Ni0xMC4xMSAxMi4yNXYuMDFjMCAuNjktLjU2IDEuMjUtMS4yNSAxLjI1aC0yLjE2Yy0uNjkgMC0xLjI1LS41Ni0xLjI1LTEuMjV2LS4wMDVDOC40NTggMjguNjMyIDQgMjMuNDM4IDQgMTcuNDc4YzAtNS4xNjYgMy4xNDMtOS41ODkgNy42MDgtMTEuNDhhMS44NiAxLjg2IDAgMCAwIDEuMTMyLTEuN3ptMiAxLjQ0OXYuMzlhMy44NiAzLjg2IDAgMCAxLTIuMzQ2IDMuNTRsLS4wMDQuMDAycS0uMjc2LjExNi0uNTQyLjI0OGMtMS45NiAyLjA4NS0zLjExOCA1LjM0MS0zLjExOCA4Ljg0YzAgNS4zMSAyLjY0NSA5Ljc1MyA2LjE1MyAxMC44MDVjLTEuMzQ2LTIuMDE0LTIuMDYzLTYuNTE0LTIuMDYzLTEwLjgxNGMwLTMuNzYuNS03LjIxIDEuMzctOS40NGwuNzUuMjljLS44MiAyLjExLTEuMzEgNS41My0xLjMxIDkuMTVjMCAzLjAzLjMzIDUuODguOTQgOC4wMmMuNTUyIDEuOTQ5IDEuMiAyLjgyIDEuNjkgMy4wMjJxLjIyMS4wMDUuNDQxIDBjLjQ4OS0uMjAzIDEuMTM3LTEuMDc0IDEuNjg5LTMuMDIyYy42LTIuMTQuOTQtNC45OC45NC04LjAyYzAtMy42MS0uNDktNy4wMy0xLjMxLTkuMTVsLjc1LS4yOWMuODcgMi4yNCAxLjM3IDUuNjggMS4zNyA5LjQ0Yy0uMDA3IDQuMy0uNzIgOC44MDEtMi4wNjQgMTAuODE0YzMuNTA4LTEuMDUgNi4xNTQtNS40OTQgNi4xNTQtMTAuODA0YzAtMy40OTUtMS4xNTUtNi43NDYtMy4xMDktOC44MzJhMTAgMTAgMCAwIDAtLjU2LS4yNTdsLS4wMTItLjAwNWEzLjg3IDMuODcgMCAwIDEtMi4zMzktMy41NDZ2LS4zODFsLS42MzUuNzI2YTEuNDU2IDEuNDU2IDAgMCAxLTIuMTg2LjAxNmwtLjAwNi0uMDA3ek05LjY3IDkuNTJBMTAuNDQgMTAuNDQgMCAwIDAgNiAxNy40NzhjMCAzLjc5NyAyLjE4IDcuMjQgNS4zMzUgOS4wOHEtLjU0Ny0uNTU5LTEuMDM1LTEuMjRjLTEuNjEtMi4yNS0yLjQ5LTUuMjMtMi40OS04LjM5YzAtMi43MjguNjctNS4zMjYgMS44Ni03LjQwN20xMS44MTcgMTcuMTY3YTEwLjQ3IDEwLjQ3IDAgMCAwIDUuNDYzLTkuMmMwLTMuMTc2LTEuNDE2LTYuMDI1LTMuNjQ5LTcuOTQ3YzEuMTg0IDIuMDc4IDEuODQ5IDQuNjY4IDEuODQ5IDcuMzg3YzAgMy4xNi0uODggNi4xNC0yLjQ5IDguMzlxLS41NS43NjItMS4xNzMgMS4zNyIvPjwvc3ZnPg=="}, {"id": "F04", "phase": "main", "article": "die", "german": "Kerze", "fullGerman": "die Kerze", "korean": "양초", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "K", "iconId": "fluent-emoji-high-contrast:candle", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0xNi40MDggMi40MjFsMS44NSAzLjE1YTMuMDQ4IDMuMDQ4IDAgMCAxLTEuNzggNC41NVYxMS41SDIwLjVhMiAyIDAgMCAxIDEuOTM3IDEuNWguMDYzdjYuNzVhMS43NSAxLjc1IDAgMCAxLTEuNSAxLjczMnY2LjEwNkEyLjQxIDIuNDEgMCAwIDEgMTguNTg4IDMwaC02LjE3NkEyLjQxIDIuNDEgMCAwIDEgMTAgMjcuNTg5di04LjY3M0ExLjUgMS41IDAgMCAxIDkgMTcuNVYxM2guMDYzQTIgMiAwIDAgMSAxMSAxMS41aDMuODY2di0xLjM4Yy0xLjI0NS0uMzQ3LTIuMTg4LTEuNDc3LTIuMjQtMi44MThBMy4wNCAzLjA0IDAgMCAxIDEzIDUuNzE3bC4wMS0uMDE3bC4wNy0uMTJsMS44NTYtMy4xNTlhLjg1NC44NTQgMCAwIDEgMS40NzIgME0xOSAxNWgtLjV2MWExLjUgMS41IDAgMCAxLTMgMHYtMUgxMnYxMi41ODhjMCAuMjI4LjE4NC40MTIuNDEyLjQxMmg2LjE3NmEuNDEuNDEgMCAwIDAgLjQxMi0uNDEyem0tMS42NjQtNy42MjdhMS42NjMgMS42NjMgMCAxIDAtMy4zMjYgMGExLjY2MyAxLjY2MyAwIDAgMCAzLjMyNiAwIi8+PC9zdmc+"}, {"id": "F05", "phase": "main", "article": "die", "german": "Schere", "fullGerman": "die Schere", "korean": "가위", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "S", "iconId": "fluent-emoji-high-contrast:scissors", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0xMy4xMTkgMTUuNzg1bDEuNjMyLTEuNjdsMTAuNzQyIDEwLjc0MmMuOTEuOTEuOTMzIDIuNDY3LjA5IDMuMzkyem0xLjY0NS00LjQ4NWE2LjMgNi4zIDAgMCAwIC4yNTYtMS43N0MxNS4wMiA1LjkyIDEyLjEgMyA4LjUgM1MyIDUuOTIgMiA5LjUyczIuOSA2LjUyIDYuNSA2LjUyYTYuMyA2LjMgMCAwIDAgMS43ODYtLjI2bDEuMjM3IDEuMjM3bC0uNDUuNDUxbC0yLjA3OSAyLjA3NmwtMy45NjEgMy45NTlhNC4zNiA0LjM2IDAgMCAwIDAgNi4xNjRsLjM5NC4zOTRsLjMwNC4zMDRsLjAwMS4wMDJsLjcwOC43MDdsLjcwNy0uNzA3bDguODYzLTguODYzbDguODYzIDguODYzbC43MDEuNzAybC43MDctLjY5NmwuNjQtLjYzbC4wMDYtLjAwNmMxLjcwNi0xLjcwNiAxLjY4NS00LjU5LS4wMi02LjI5NGwtNi40MTgtNi40MThsLjQ2LS40NmwuNzgtLjc4YTYuMyA2LjMgMCAwIDAgMS43NzEuMjU1YzMuNiAwIDYuNS0yLjkyIDYuNS02LjUyUzI3LjEgMyAyMy41IDNzLTYuNTIgMi45Mi02LjUyIDYuNTJjMCAuNjIuMDkyIDEuMjIuMjYgMS43ODZsLTEuMjM2IDEuMjM0ek01LjQ4IDkuNTJjMC0xLjY3IDEuMzYtMy4wMyAzLjAzLTMuMDNzMy4wMyAxLjM2IDMuMDMgMy4wM2MwIDEuNjgtMS4zNiAzLjAzLTMuMDMgMy4wM3MtMy4wMy0xLjM2LTMuMDMtMy4wM203LjQ1OCA4LjkxMmwxLjY1OCAxLjY1OGwtOC4xNTYgOC4xNTZhMi4zNiAyLjM2IDAgMCAxIC4wMDctMy4zMjlsMy45Ni0zLjk1OGwyLjA3OS0yLjA3NnpNMjAuNDYgOS41MmMwLTEuNjcgMS4zNi0zLjAzIDMuMDMtMy4wM3MzLjAzIDEuMzYgMy4wMyAzLjAzcy0xLjM2IDMuMDMtMy4wMyAzLjAzcy0zLjAzLTEuMzUtMy4wMy0zLjAzbS00LjQ4IDguNThhMS4wNyAxLjA3IDAgMSAwIDAtMi4xNGExLjA3IDEuMDcgMCAwIDAgMCAyLjE0Ii8+PC9zdmc+"}, {"id": "F06", "phase": "main", "article": "die", "german": "Zahnbürste", "fullGerman": "die Zahnbürste", "korean": "칫솔", "level": "A1", "deSyllables": 3, "koSyllables": 2, "isCompound": true, "firstLetter": "Z", "iconId": "fluent-emoji-high-contrast:toothbrush", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im05LjMwMyAxLjk1OGwtMi41MyAyLjUyNmEzLjA4IDMuMDggMCAwIDAtMy44NjMuNDQ0YTMuMTM3IDMuMTM3IDAgMCAwIC4wMDQgNC40MjNsNi4wNTQgNi4xMTRsLjI4Ny4zbDEzLjkgMTQuMDQ3YTMuOTggMy45OCAwIDAgMCA1LjY3NC0uMDAxYzEuNTYtMS41NzYgMS41NjQtNC4xMzEtLjAwMi01LjcwMWwtLjAwMi0uMDAybC03LjM5My03LjQ4N2ExMy4zIDEzLjMgMCAwIDAtNC4xOTQtMi44NTNhMTEuMyAxMS4zIDAgMCAxLTIuNDg0LTEuNDY3bDIuNDQ4LTIuNDQ4bC4wMDQtLjAwNGExLjU0NiAxLjU0NiAwIDAgMC0uOTktMi42MjdhMS41MyAxLjUzIDAgMCAwLTEuNDMtMS40MzFhMS41NSAxLjU1IDAgMCAwLTEuNDItMS40MjlhMS41MiAxLjUyIDAgMCAwLS40NTUtLjk3OGExLjUzIDEuNTMgMCAwIDAtLjk3NS0uNDQyYTEuNTIgMS41MiAwIDAgMC0uNDU1LS45ODZhMS41MjYgMS41MjYgMCAwIDAtMi4xNzguMDAybTEuNDY3LjcwMWwuMDEuMDFhLjU0LjU0IDAgMCAxIC4wODYuNjU2bC0uMDIxLjA0MmwtMi41NzYgMi41MTdsLS43MzctLjc0NWwyLjQ4LTIuNDc1bC4wMDQtLjAwNWEuNTI2LjUyNiAwIDAgMSAuNzU1IDBtLjkgMS4zYS41NS41NSAwIDAgMSAuNTM2LjEzNWwuMDA1LjAwNGEuNTI0LjUyNCAwIDAgMSAuMDgzLjY0OUw5LjY3NiA3LjMwNWwtLjcwMy0uNzF6bTEuNDAyIDEuNDI1YS41NDcuNTQ3IDAgMCAxIC43MDIuNjUybC0yLjcyMSAyLjY2bC0uNjczLS42OHpNMTQuMzIgNi45bC4wNzgtLjAzNmEuNTUuNTUgMCAwIDEgLjY2Ni4wOGEuNTUuNTUgMCAwIDEgLjEzOC41MjVsLTIuNzI2IDIuNjY0bC0uNzItLjcyN3ptMS40NDIgMS40MmwuMDYzLS4wM2EuNTUuNTUgMCAwIDEgLjY2LjA4NGwuMDA0LjAwNGMuMjEuMjA1LjIxOC41NS4wMDMuNzdMMTMuOTkgMTEuNjVxLS4xNTktLjE0OC0uMzEyLS4zMDNsLS40OTgtLjUwM3pNNS44OTkgNi4zMzNsNi4zNTggNi40MjFhMTMuMyAxMy4zIDAgMCAwIDQuMTkzIDIuODUyYTExLjMgMTEuMyAwIDAgMSAzLjU2IDIuNDIybDcuMzk2IDcuNDg5bC4wMDQuMDA0Yy43ODUuNzg2Ljc5IDIuMDg0LS4wMDMgMi44ODRsLS4wMDMuMDAzYTEuOTggMS45OCAwIDAgMS0yLjgyOC0uMDAzTDEwLjY4OCAxNC4zN2wtLjI4Ny0uM2wtNi4wNjctNi4xMjhsLS4wMDUtLjAwNWExLjEzNyAxLjEzNyAwIDAgMSAuMDA1LTEuNjA0bC4wMDQtLjAwNGExLjA4NyAxLjA4NyAwIDAgMSAxLjU2LjAwNCIvPjwvc3ZnPg=="}, {"id": "F07", "phase": "main", "article": "die", "german": "Kartoffel", "fullGerman": "die Kartoffel", "korean": "감자", "level": "A1", "deSyllables": 3, "koSyllables": 2, "isCompound": false, "firstLetter": "K", "iconId": "fluent-emoji-high-contrast:potato", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xOS45NjcgNy45NDZhMS40IDEuNCAwIDEgMCAwLTIuOGExLjQgMS40IDAgMCAwIDAgMi44bS4zNiA1LjU1YTEuODMgMS44MyAwIDEgMS0zLjY2IDBhMS44MyAxLjgzIDAgMCAxIDMuNjYgMG0tOC42NSA1LjUxYTEuNjggMS42OCAwIDEgMS0zLjM2IDBhMS42OCAxLjY4IDAgMCAxIDMuMzYgMG0tLjM3IDYuMDNhMS4xNiAxLjE2IDAgMSAwIDAtMi4zMmExLjE2IDEuMTYgMCAwIDAgMCAyLjMybTE0LjM1LTEwLjM4YTEuMTYgMS4xNiAwIDEgMS0yLjMyIDBhMS4xNiAxLjE2IDAgMCAxIDIuMzIgMCIvPjxwYXRoIGQ9Ik0yMy42ODQgMi4wMjFBMTAuNzA2IDEwLjcwNiAwIDAgMCAxMC40OSA1LjM3NGwtNS4yNCA3LjE0Yy00LjMyMyA1Ljg4OC0yLjE4OCAxNC4yNiA0LjQyIDE3LjM2N2M1LjgzNCAyLjc0NiAxMi43NzIuMjA2IDE1LjQ3NC01LjYzNWEyMjk0IDIyOTQgMCAwIDAgMi40MTMtNS4yMjVsMS4yOTctMi44MTdjMi40Ni01LjM0LjE1NC0xMS42Ny01LjE3MS0xNC4xODNtLTExLjU4IDQuNTM2QTguNzA2IDguNzA2IDAgMCAxIDIyLjgzIDMuODNjNC4zMzUgMi4wNDYgNi4yMDkgNy4xOTYgNC4yMDkgMTEuNTM3bC0xLjI5NyAyLjgxNnYuMDAyYy0uNjUgMS40MS0uNjY1IDEuNDQ0LTIuNDEzIDUuMjJjLTIuMjM3IDQuODM5LTcuOTggNi45MzgtMTIuODA2IDQuNjY2Yy01LjQ3MS0yLjU3My03LjIzNy05LjUwMi0zLjY2LTE0LjM3NHoiLz48L2c+PC9zdmc+"}, {"id": "F08", "phase": "main", "article": "die", "german": "Erdbeere", "fullGerman": "die Erdbeere", "korean": "딸기", "level": "A1", "deSyllables": 3, "koSyllables": 2, "isCompound": true, "firstLetter": "E", "iconId": "fluent-emoji-high-contrast:strawberry", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik05LjYyIDEzLjI0Yy0uNTEgMC0uOTMuNDItLjkzLjkzdi45M2MwIC41MS40Mi45My45My45M3MuOTMtLjQyLjkzLS45M3YtLjkzYzAtLjUyLS40Mi0uOTMtLjkzLS45M20yLjI1IDUuODNjMC0uNTEuNDItLjkzLjkzLS45M2MuNTIgMCAuOTMuNDIuOTMuOTNWMjBjMCAuNTEtLjQyLjkzLS45My45M3MtLjkzLS40Mi0uOTMtLjkzem03LjMtLjkzYy0uNTEgMC0uOTMuNDItLjkzLjkzVjIwYzAgLjUxLjQyLjkzLjkzLjkzcy45My0uNDIuOTMtLjkzdi0uOTNjMC0uNTEtLjQxLS45My0uOTMtLjkzbS00LjExLTMuOTdjMC0uNTEuNDItLjkzLjkzLS45M3MuOTMuNDEuOTMuOTN2LjkzYzAgLjUxLS40Mi45My0uOTMuOTNzLS45My0uNDItLjkzLS45M3ptMCA5LjQ1YzAtLjUxLjQyLS45My45My0uOTNzLjkzLjQyLjkzLjkzdi45M2MwIC41MS0uNDIuOTMtLjkzLjkzcy0uOTMtLjQyLS45My0uOTN6bTYuMzgtOS40NWMwLS41MS40Mi0uOTMuOTMtLjkzcy45My40MS45My45M3YuOTNjMCAuNTEtLjQyLjkzLS45My45M3MtLjkzLS40Mi0uOTMtLjkzeiIvPjxwYXRoIGQ9Ik0xNi45OCAzYTEgMSAwIDEgMC0yIDB2MmgtMy40YTYuNDQ2IDYuNDQ2IDAgMCAwLTYuNDQgNi40NHYxaC42MzljLTEuNDEyIDMuNTc2LTEgNy44ODIgMS45OCAxMS4yNjFsNS4yNzIgNS45NzJhMy45NCAzLjk0IDAgMCAwIDUuODk3IDBsNS4yNzEtNS45NzJjMi45OC0zLjM3OSAzLjM5Mi03LjY4NSAxLjk4LTExLjI2MWguNjN2LTFBNi40NCA2LjQ0IDAgMCAwIDIwLjM3IDVoLTMuMzl6bS05LjAxNCA5LjQ0aDMuNzEzYTYuNDIgNi40MiAwIDAgMCA0LjI5Ny0xLjY0M2E2LjQyIDYuNDIgMCAwIDAgNC4yOTMgMS42NDNoMy43MjNjMS41MjIgMy4wNTEgMS4zNSA2Ljk0LTEuMjkzIDkuOTM4bC01LjI2OCA1Ljk2OWExLjk0IDEuOTQgMCAwIDEtMi45MDMgMGwtNS4yNy01Ljk2OWMtMi42NDItMi45OTgtMi44MTQtNi44ODctMS4yOTItOS45MzgiLz48L2c+PC9zdmc+"}, {"id": "F09", "phase": "main", "article": "die", "german": "Wolke", "fullGerman": "die Wolke", "korean": "구름", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "W", "iconId": "fluent-emoji-high-contrast:cloud", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xNC41NSA5LjcwNGMzLjQ2LTMuNTUgOS4xNC0zLjYxIDEyLjY5LS4xNWMzLjI4IDMuMjEgMy41OCA4LjMzLjg2IDExLjg5YTguMzcgOC4zNyAwIDAgMS02LjgzIDMuNTJIOC41OGMtMi4xMSAwLTMuOTgtMS01LjE3LTIuNTZBNi40NyA2LjQ3IDAgMCAxIDIgMTguMzc0YTYuNDU3IDYuNDU3IDAgMCAxIDYuNTg5LTYuNDU4YTQuMDQgNC4wNCAwIDAgMSA1LjYyNC0xLjg0OXEuMTYzLS4xODQuMzM3LS4zNjMiLz48L3N2Zz4="}, {"id": "F10", "phase": "main", "article": "die", "german": "Zeitung", "fullGerman": "die Zeitung", "korean": "신문", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "Z", "iconId": "fluent-emoji-high-contrast:newspaper", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik02IDEwYTEgMSAwIDAgMCAwIDJoMThhMSAxIDAgMSAwIDAtMnptLS41IDRhLjUuNSAwIDAgMCAwIDFoMTlhLjUuNSAwIDEgMCAwLTF6TTE5IDE3LjVhLjUuNSAwIDAgMSAuNS0uNWg1YS41LjUgMCAwIDEgMCAxaC01YS41LjUgMCAwIDEtLjUtLjVtLjUgMi41YS41LjUgMCAwIDAgMCAxaDVhLjUuNSAwIDEgMCAwLTF6bS0uNSAzLjVhLjUuNSAwIDAgMSAuNS0uNWg1YS41LjUgMCAwIDEgMCAxaC01YS41LjUgMCAwIDEtLjUtLjVtLjUgMi41YS41LjUgMCAwIDAgMCAxaDVhLjUuNSAwIDEgMCAwLTF6TTUgMTlhMiAyIDAgMCAxIDItMmg4YTIgMiAwIDAgMSAyIDJ2NmEyIDIgMCAwIDEtMiAySDdhMiAyIDAgMCAxLTItMnoiLz48cGF0aCBkPSJNOCA0YTIgMiAwIDAgMC0yIDJIMy45NjJDMi4yNTIgNiAxIDcuNDE4IDEgOXYxOGMwIDIuMTM0IDEuNjgzIDQgMy45MjMgNGgyNC4wOTRBMiAyIDAgMCAwIDMxIDI5VjZhMiAyIDAgMCAwLTItMnptMTguMDQgNGEuOTcuOTcgMCAwIDEgLjkzOS43ODZxLjAyMS4xMDMuMDIyLjIxNHYxOGEyIDIgMCAwIDAgMiAySDQuOTIzQzMuODYxIDI5IDMgMjguMTA1IDMgMjdWOWMwLS41NTIuNDMtMSAuOTYyLTF6Ii8+PC9nPjwvc3ZnPg=="}, {"id": "F11", "phase": "main", "article": "die", "german": "Blume", "fullGerman": "die Blume", "korean": "꽃", "level": "A1", "deSyllables": 2, "koSyllables": 1, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:tulip", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yNC41ODggMTYuNzg1Yy43MDQtMS42MzEgMS4wNzItNC4zNzQgMS4wNzItNi4yNDJsLS4wMS02LjQ1NGMtLjAwMS0xLjEzLS44MTItMi4wNjgtMS44MjUtMi4wODlIMjMuOGMtMS45NTkgMC0zLjcxNiAxLjMzMy01LjE0OSAzLjMwOWMtLjU2Ny0uODk2LTEuMjE0LTEuNzQ2LTEuOTgzLTIuNWExLjIzIDEuMjMgMCAwIDAtMS43NDEgMGwtLjAxLjAxYy0uNzQ1Ljc0My0xLjM3NCAxLjU3Ny0xLjkyOCAyLjQ1M0MxMS41NjEgMy4zMTggOS44MTIgMiA3Ljg2IDJjLTEuMDIgMC0xLjg1LjkzOC0xLjg1IDIuMDkxVjcuODlMNiA3Ljg3OXYyLjQxNmMwIC40MTUuMDIuODMyLjA1MyAxLjIzM2MuMDM2LjQ5Ni4yMzggMy4wMjcuNjY1IDQuMjg3YzEuMjcyIDMuOTQ1IDQuMjAzIDYuMzMgOC4xMTYgNi42Nzh2NC44NTVjLS45ODQtMS41NzQtMi43MDktMi42MjUtNC42ODItMi42MjVoLTIuMDdhLjc4Ljc4IDAgMCAwLS43OC43OHYuNDJjMCAyLjY2NSAyLjEzNSA0Ljg2IDQuNzYgNC44ODJoNi45NjVjMi45NTIgMCA1LjM4Ny0yLjMyMiA1LjU0Mi01LjI4MWEuNzU2Ljc1NiAwIDAgMC0uNzUtLjgwMmwtMi44ODQuMDFjLTEuNzU1LjAxNS0zLjI3MyAxLjAxLTQuMDk4IDIuNDU1di00LjcxYzMuNjM3LS4zMTEgNi4zNzctMi4yOTYgNy43NTEtNS42OTJtLTE1Ljk3LTEuNmMtLjI1Ny0uNzU4LS40NzEtMi40NTYtLjU3LTMuODA4cS0uMDI2LS4zMDEtLjAzOC0uNjA4VjQuMDkxcTAtLjA0OC4wMDktLjA4NWMyLjU5Mi4xNzIgNS4wNSA0LjQ1OSA2LjE2NyA4LjY5NmMuMjE5LjgyNC44ODEgMS4zNzYgMS42NDggMS4zNzZoLjAwMWMuNzU4IDAgMS40MTItLjU0NiAxLjYyNi0xLjM1OGMxLjEyNi00LjI1OSAzLjU5OC04LjU2IDYuMTc1LTguNzE2YS4zLjMgMCAwIDEgLjAxMS4wODZsLjAxIDYuNDU0YzAgMS42NDItLjMzOSA0LjEyOS0uOTE2IDUuNDY4Yy0xLjUxMyAzLjc0LTQuNTkyIDQuNTI2LTYuOTA3IDQuNTI2Yy0zLjUzOC4wMDEtNi4xLTEuODk1LTcuMjE3LTUuMzUzIi8+PC9zdmc+"}, {"id": "F12", "phase": "main", "article": "die", "german": "Ampel", "fullGerman": "die Ampel", "korean": "신호등", "level": "A1", "deSyllables": 2, "koSyllables": 3, "isCompound": false, "firstLetter": "A", "iconId": "fluent-emoji-high-contrast:vertical-traffic-light", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xMi44IDdjLS4zNDEgMC0uNTkxLS4zMjQtLjQ1MS0uNjM2YTQgNCAwIDAgMSA3LjMwMiAwYy4xNC4zMTItLjExLjYzNi0uNDUyLjYzNmEuNTkuNTkgMCAwIDEtLjUxNC0uMzRhMyAzIDAgMSAxLTUuMzcgMGEuNTkuNTkgMCAwIDEtLjUxNC4zNE0xOCA3YTEgMSAwIDEgMC0yIDBhMSAxIDAgMCAwIDIgMG0tNS42NTEgNy4zNjRjLS4xNC4zMTIuMTEuNjM2LjQ1Mi42MzZhLjU5LjU5IDAgMCAwIC41MTQtLjM0YTMgMyAwIDEgMCA1LjM3IDBjLjA5OS4xOTguMjkyLjM0LjUxNC4zNGMuMzQyIDAgLjU5Mi0uMzI0LjQ1Mi0uNjM2YTQuMDAxIDQuMDAxIDAgMCAwLTcuMzAyIDBNMTcgMTZhMSAxIDAgMSAxIDAtMmExIDEgMCAwIDEgMCAybS00LjY1MiA2LjM2NGMtLjE0LjMxMi4xMS42MzYuNDUyLjYzNmMuMjIxIDAgLjUxNC0uMzQuNTE0LS4zNFMxMyAyMyAxMyAyNGEzIDMgMCAxIDAgNS42OTgtMS4zMTJhLjU4LjU4IDAgMCAwIC41LjMxMmMuMzQyIDAgLjU5Mi0uMzI0LjQ1Mi0uNjM2YTQgNCAwIDAgMC03LjMwMiAwTTE4IDIzYTEgMSAwIDEgMS0yIDBhMSAxIDAgMCAxIDIgMCIvPjxwYXRoIGQ9Ik0yNCA4LjAwNkMyNCAzLjU5IDIwLjQxNyAwIDE2IDBTOCAzLjU5IDggOC4wMDZ2MTUuOTg4QzggMjguNDEgMTEuNTgzIDMyIDE2IDMyczgtMy41OSA4LTguMDA2ek0xNiAyYzMuMzEgMCA2IDIuNjkzIDYgNi4wMDZ2MTUuOTg4QTYuMDEgNi4wMSAwIDAgMSAxNiAzMGMtMy4zMSAwLTYtMi42OTMtNi02LjAwNlY4LjAwNkE2LjAxIDYuMDEgMCAwIDEgMTYgMiIvPjwvZz48L3N2Zz4="}, {"id": "N01", "phase": "main", "article": "das", "german": "Messer", "fullGerman": "das Messer", "korean": "칼", "level": "A1", "deSyllables": 2, "koSyllables": 1, "isCompound": false, "firstLetter": "M", "iconId": "fluent-emoji-high-contrast:kitchen-knife", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0xNC42NjUgMTAuMzkzbDEuMzg3IDEuNDkybC4wMDMtLjAwMmwxMy40NTQgMTQuNDA0bC4yOTYuMzE2YS43LjcgMCAwIDEgLjE0LjIxNWEuNzMuNzMgMCAwIDEtLjE4LjgyNWwtLjM0LjMyYTcuNzYzIDcuNzYzIDAgMCAxLTEwLjk4LS4zOGwtOC40MS05LjAxYy0uMy0uMzItLjI4LS44Mi4wNC0xLjExbDIuMzYyLTIuMjA0bC0xLjM4Mi0xLjQ5NmwtMy4zLTMuNTRhNS4xNSA1LjE1IDAgMCAwLTIuOTQtMS41N2EzLjM1OCAzLjM1OCAwIDAgMS0xLjY4LTUuODNjMS4zOC0xLjIxIDMuNDgtMS4wNiA0LjczLjI4em0xNC4wMjggMTYuNDg1TDE2LjAwNiAxMy4yOTZMMTEuNCAxNy41OTRsNy40NjcgOGE3Ljc4NiA3Ljc4NiAwIDAgMCA5LjgyNiAxLjI4NE04LjAzNSA1LjkwM2EuOTEuOTEgMCAxIDAtMS44MiAwYS45MS45MSAwIDAgMCAxLjgyIDBtMy42NCAzLjg5YS45MS45MSAwIDEgMC0xLjgyIDBhLjkxLjkxIDAgMCAwIDEuODIgMCIvPjwvc3ZnPg=="}, {"id": "N02", "phase": "main", "article": "das", "german": "Fenster", "fullGerman": "das Fenster", "korean": "창문", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "F", "iconId": "fluent-emoji-high-contrast:window", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik02LjUgNUExLjUgMS41IDAgMCAwIDUgNi41djhhLjUuNSAwIDAgMCAuNS41aDlhLjUuNSAwIDAgMCAuNS0uNXYtOWEuNS41IDAgMCAwLS41LS41em0xMSAwYS41LjUgMCAwIDAtLjUuNXY5YS41LjUgMCAwIDAgLjUuNWg5YS41LjUgMCAwIDAgLjUtLjV2LThBMS41IDEuNSAwIDAgMCAyNS41IDV6bTguMzU0IDEuMTQ2QS41LjUgMCAwIDEgMjYgNi41VjE0aC04ek0xNyAxNy41YS41LjUgMCAwIDEgLjUtLjVoOWEuNS41IDAgMCAxIC41LjV2OGExLjUgMS41IDAgMCAxLTEuNSAxLjVoLThhLjUuNSAwIDAgMS0uNS0uNXptMSA4LjVoNy41YS41LjUgMCAwIDAgLjUtLjVWMThoLTh6TTUuNSAxN2EuNS41IDAgMCAwLS41LjV2OEExLjUgMS41IDAgMCAwIDYuNSAyN2g4YS41LjUgMCAwIDAgLjUtLjV2LTlhLjUuNSAwIDAgMC0uNS0uNXptOC41IDF2OEg2LjVhLjUuNSAwIDAgMS0uMzU0LS4xNDZ6Ii8+PHBhdGggZD0iTTYgMWE1IDUgMCAwIDAtNSA1djIwYTUgNSAwIDAgMCA1IDVoMjBhNSA1IDAgMCAwIDUtNVY2YTUgNSAwIDAgMC01LTV6TTMgNmEzIDMgMCAwIDEgMy0zaDIwYTMgMyAwIDAgMSAzIDN2MjBhMyAzIDAgMCAxLTMgM0g2YTMgMyAwIDAgMS0zLTN6Ii8+PC9nPjwvc3ZnPg=="}, {"id": "N03", "phase": "main", "article": "das", "german": "Fahrrad", "fullGerman": "das Fahrrad", "korean": "자전거", "level": "A1", "deSyllables": 2, "koSyllables": 3, "isCompound": true, "firstLetter": "F", "iconId": "fluent-emoji-high-contrast:bicycle", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xNC41IDEwYS41LjUgMCAwIDAgMC0xaC0zYTIuNSAyLjUgMCAwIDAgMCA1aC4xNmwtLjUyNCAxLjA0OGEuNi42IDAgMCAwLS4xNjYuMjE2bC0xLjc4IDQuMDAxYTUuNSA1LjUgMCAxIDAgMS4wNi40NzJsLjM5Mi0uODhsNS40NzYgNC4zODFBMiAyIDAgMCAwIDE2IDI0YzAgMS4yMDkgMS4wMjkgMi4xNDEgMi4yMDIgMS45ODJsLjk4MS0uMDdhNS41IDUuNSAwIDEgMCAzLjIyLTYuNDk5bC0yLjE4My0zLjgyMmwuMjk3LTEuNDg3YS41LjUgMCAwIDAgLjAxLS4xMDRIMjFhMSAxIDAgMSAwIDAtMmgtMmExIDEgMCAxIDAgMCAyaC40NjJsLS4xOTQuOTY4YS41OC41OCAwIDAgMC0uMzQuNDMxbC0xLjE1NSA2LjU0NmMtLjM1LjAzNy0uNjc4LjE2Ny0uOTU0LjM2N2wtNS42ODktNC41NTFsLjktMi4wMjVhLjYuNiAwIDAgMCAuMDUtLjIxN0wxMi44NCAxNGguNjZhLjUuNSAwIDAgMCAwLTFoLS44MzFhLjUzLjUzIDAgMCAwLS4zMzggMEgxMS41YTEuNSAxLjUgMCAwIDEgMC0zem01LjcwMyAxNS44NGwyLjQxMi0uMTdsMi4zMTItLjExNmExLjEzIDEuMTMgMCAwIDAgLjE2NS0yLjIzNmwtLjUxOS0uMTAzbC0xLjY2OS0yLjkyNGE0LjUgNC41IDAgMSAxLTIuNzAxIDUuNTVtMS42NzgtNWwxLjE4MyAyLjA3M2wtMi41NDctLjUxYTQuNSA0LjUgMCAwIDEgMS4zNjQtMS41NjNtLS40OTgtLjg3MmE1LjUgNS41IDAgMCAwLTEuODggMi4yMzJsLS41NzYtLjExNWwuODY1LTQuOTAyek03LjUgMjBjLjQ0NiAwIC44NzYuMDY1IDEuMjgyLjE4NWwtMS44MTIgNC4wOGEuNTguNTggMCAwIDAgMS4wNi40N2wxLjgxMy00LjA3OEE0LjUgNC41IDAgMSAxIDcuNSAyMCIvPjwvc3ZnPg=="}, {"id": "N04", "phase": "main", "article": "das", "german": "Flugzeug", "fullGerman": "das Flugzeug", "korean": "비행기", "level": "A1", "deSyllables": 2, "koSyllables": 3, "isCompound": true, "firstLetter": "F", "iconId": "fluent-emoji-high-contrast:airplane", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Im0xMi43NzIgMjMuMzJsMS4zNDkgNS41NTVhLjkuOSAwIDAgMS0uMjUuODcyYy0uNDQuNDQyLS45NTkuMjcxLTEuNDQ4LS4yNWwtNC4xNjctNC4yMjRsLTEuNDE2IDEuNDEyYTEuMDcgMS4wNyAwIDAgMS0xLjUyNi0uMDFhMS4wOCAxLjA4IDAgMCAxIC4wMS0xLjUzM2wxLjQxMi0xLjQxbC00LjI2My00LjMyMWMtLjQ0LS40NjItLjY4LTEuMDEzLS4yNC0xLjQ1NGMuMjMtLjIyLjU1LS4zMTEuODYtLjIzbDUuNTI0IDEuNDAzYTI2LjIgMjYuMiAwIDAgMSAzLjY0Ni00LjgxM2wyLjk1My0zLjA3MmwtOC4yNS00LjY4NGMtMS4yOS0uNzMtMS4yOS0yLjU5LjAxLTMuMzJjLjQyLS4yMy45MS0uMyAxLjM3LS4xOWw1LjY3NiAxLjMzbDEuMDYyLTEuMDU2YTEuMTI2IDEuMTI2IDAgMCAxIDEuNTkzLjAxYTEuMTQgMS4xNCAwIDAgMS0uMDEgMS42MDFsLS4wNTIuMDUybDMuNzY3Ljg4MmwyLjUtMi42MDJhNC4xNCA0LjE0IDAgMCAxIDUuOTI0LS4wNGE0LjE2MyA0LjE2MyAwIDAgMS0uMSA1LjkzNmwtMi4yNzcgMi4xNjFsMS4wMTQgNC43NmMuNDEtLjE2OS45LS4wODcgMS4yMjcuMjVhMS4xMjMgMS4xMjMgMCAwIDEtLjAxIDEuNjAxbC0uNjguNjc2TDI5IDIzLjRjLjEuNDcuMDIuOTUtLjIyIDEuMzZjLS43NSAxLjI4LTIuNjIgMS4yNS0zLjMyLS4wNmwtNC40NTEtOC4yMjhsLTMuNDEyIDMuMjRhMjYgMjYgMCAwIDEtNC44MjUgMy42MDlNMjYuMjUzIDQuMjE5YS43My43MyAwIDAgMC0xLjAzMi0uMDFhLjcxMy43MTMgMCAwIDAtLjAxIDEuMDIybDEuNTQgMS41NTJhLjczLjczIDAgMCAwIDEuMDMyLjAxYS43Mi43MiAwIDAgMCAuMDEtMS4wMjJ6Ii8+PC9zdmc+"}, {"id": "N05", "phase": "main", "article": "das", "german": "Geschenk", "fullGerman": "das Geschenk", "korean": "선물", "level": "A1", "deSyllables": 2, "koSyllables": 2, "isCompound": false, "firstLetter": "G", "iconId": "fluent-emoji-high-contrast:wrapped-gift", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0yMC41MzQgMy4wODRDMjIuOTU0Ljc0IDI3IDIuNDYzIDI3IDUuODQ3YzAgLjQyNC0uMTIzLjgyLS4zMzYgMS4xNTNoLjk5N0EyLjM0IDIuMzQgMCAwIDEgMzAgOS4zNDJ2NC4zMTZhMi4zNCAyLjM0IDAgMCAxLTIgMi4zMTh2MTEuOTM4QzI4IDI5LjYyIDI2LjYwMyAzMSAyNC44ODggMzFINy4xMTJDNS40IDMxIDQgMjkuNjM0IDQgMjcuOTE0VjE1Ljk3NmEyLjM0IDIuMzQgMCAwIDEtMi0yLjMxOFY5LjM0MkEyLjM0IDIuMzQgMCAwIDEgNC4zMzggN2guOTkzQTIuMTUgMi4xNSAwIDAgMSA1IDUuODQ3QzUgMi40NjMgOS4wNDUuNzMxIDExLjQ2NyAzLjA4NGwxLjc5IDEuNzM2QTMgMyAwIDAgMSAxNi4wMDUgM2MxLjIyNSAwIDIuMjc4Ljc0NSAyLjc0MiAxLjgxNnpNNiAxNnYxMS45MTRDNiAyOC41MDcgNi40ODIgMjkgNy4xMTIgMjlIMTNWMTZ6bTEzIDB2MTNoNS44ODhBMS4xIDEuMSAwIDAgMCAyNiAyNy45MTRWMTZ6bTktMi4zNDJWOS4zNDJBLjM0LjM0IDAgMCAwIDI3LjY2MiA5SDE5djVoOC42NjJhLjM0LjM0IDAgMCAwIC4zMzgtLjM0Mk0xMyA5SDQuMzM4QS4zNC4zNCAwIDAgMCA0IDkuMzQydjQuMzE2YS4zNC4zNCAwIDAgMCAuMzM4LjM0MkgxM3oiLz48L3N2Zz4="}, {"id": "N06", "phase": "main", "article": "das", "german": "Schwein", "fullGerman": "das Schwein", "korean": "돼지", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "S", "iconId": "fluent-emoji-high-contrast:pig", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik03LjI1IDE1LjVjLS41NTYgMC0xIC40NDQtMSAxdjFjMCAuNTU2LjQ0NCAxIDEgMXMxLS40NDQgMS0xdi0xYzAtLjU1Ni0uNDQ0LTEtMS0xIi8+PHBhdGggZD0iTTUuOTUgOGgxLjcxYTMuNTIgMy41MiAwIDAgMSAyLjQ2IDEuMDFMMjIgOWMyLjA3MSAwIDMuOTc5LjcgNS41IDEuODc1di0uMDA1YzAtLjYwNy42MTEtMS4wNiAxLjIwNC0uODI1QTIuODIgMi44MiAwIDAgMSAzMC41IDEyLjY4djIuMzU0Yy4zMjQuOTI4LjUgMS45MjYuNSAyLjk2NmE4Ljk4IDguOTggMCAwIDEtMiA1LjY1NXY2LjAzNWMwIC43MjItLjU4OCAxLjMxLTEuMzEgMS4zMWgtMS4zOGMtLjcyMiAwLTEuMzEtLjU4OC0xLjMxLTEuMzF2LTEuNjI1bC0xLjQzOS0xLjA3N2wtLjU5IDIuOTQ4QTEuMzIgMS4zMiAwIDAgMSAyMS42OCAzMWgtMS4zN2ExLjMxMyAxLjMxMyAwIDAgMS0xLjI5OC0xLjUxNmwuMDA0LS4wMjFsLjQ5OS0yLjQ2M2gtMS4wOWwuNSAyLjQ2M2wuMDAzLjAyMUExLjMxMyAxLjMxMyAwIDAgMSAxNy42MyAzMWgtMS4zN2ExLjMyIDEuMzIgMCAwIDEtMS4yOS0xLjA2NEwxNC4zOCAyN0gxNHYyLjY5YzAgLjcyMi0uNTg4IDEuMzEtMS4zMSAxLjMxaC0xLjM4Yy0uNzIyIDAtMS4zMS0uNTg4LTEuMzEtMS4zMXYtMi4yNzZsLTUuMjUzLTUuMjUzbC0uMDA2LS4wMDZBLjUzLjUzIDAgMCAwIDQuMzYgMjJIMi45NEExLjk0IDEuOTQgMCAwIDEgMSAyMC4wNnYtNC4xMkExLjk0IDEuOTQgMCAwIDEgMi45NCAxNGgxLjMyMmE5LjEgOS4xIDAgMCAxIDEuNDgyLTIuMTMybC0xLjAzLTEuNTI0QzQuMDI0IDkuMzQgNC43NiA4IDUuOTUgOG0yMy41NSA1LjAyMmE5IDkgMCAwIDAtMS0xLjI0OHYtLjcyNmMuNTk2LjMwMyAxIC45MTcgMSAxLjYzMnptLTEuNDY5IDEuNDIyQTcgNyAwIDAgMCAyMi4wMDEgMTFsLTEyLjgzMi4wMWwtLjMtLjQwMkExLjUyIDEuNTIgMCAwIDAgNy42NiAxMGgtLjc2NGwxLjQ2NCAyLjE2N2wtLjY1Ny41ODJhNy4xIDcuMSAwIDAgMC0xLjY2MyAyLjE2N2ExLjkgMS45IDAgMCAxLTEuMDczLjk2OHEuMDk1LjI5MS4wOTYuNjE2djNxLS4wMDIuMzAxLS4wODQuNTc2Yy40NDMuMTEuODYuMzQgMS4xOTMuNjgybDUuMjY1IDUuMjY1Yy4zNi4zNi41NjMuODU2LjU2MyAxLjM2N3YtMy41MDVjMC0uNDMyLjExOC0uODQ2LjMzMi0xLjE2NmMuMjEtLjMxNS41NTYtLjU5NCAxLjAwOC0uNTk0aDguNTFjLjcxOCAwIDEuMzEuNDM2IDEuNyAxLjAxOWMuMzI2LjQ4Ni41MzggMS4xMDguNiAxLjc4N2wyLjMyMyAxLjczOWwuMDc1LjA5Yy4zLjM2LjQ1Mi43ODUuNDUyIDEuMjR2LTUuMDg3bC4yNS0uMjgzQTcgNyAwIDAgMCAyOSAxOGMwLS44MDctLjEzNi0xLjU4MS0uMzg3LTIuMzAyek0zLjkzIDIwYTEgMSAwIDAgMCAuMTMyLS41di0zYTEgMSAwIDAgMC0uMTMyLS41aC0uODY4djR6bTE4LjQwNyA0Ljk5MnEuNDEtLjAyLjgwNS0uMDg3YTIuOCAyLjggMCAwIDAtLjQyMi0xLjIwNWMtLjI3LS40MDQtLjU4OC0uNTc1LS44Ny0uNTc1aC04LjUxYy0uMDA4IDAtLjA4Mi4wMDYtLjE3Ni4xNDlhMS4xMyAxLjEzIDAgMCAwLS4xNjQuNjExVjI1aDYuOTJsLjAwMS0uMDA4eiIvPjwvZz48L3N2Zz4="}, {"id": "N07", "phase": "main", "article": "das", "german": "Pferd", "fullGerman": "das Pferd", "korean": "말", "level": "A1", "deSyllables": 1, "koSyllables": 1, "isCompound": false, "firstLetter": "P", "iconId": "fluent-emoji-high-contrast:horse", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xNi4wMSAxMmg3LjA0cS40ODcgMCAuOTQ2LjA5MVY5LjUwNGMwLTEuMzggMS4xMTgtMi41IDIuNDk3LTIuNWgxLjE1NGMuMTk2IDAgLjM1Ni0uMTYuMzU2LS4zNTZWNS40ODVjMC0uMjY4LjIxNy0uNDg1LjQ4NC0uNDg1QzI5LjMyMyA1IDMwIDUuNjc4IDMwIDYuNTE0djEuOTg5YzAgMS4zOC0xLjExOCAyLjUtMi40OTcgMi41SDI2LjM1YS4zNTYuMzU2IDAgMCAwLS4zNTYuMzU2djEuNjIxYTQuOTIgNC45MiAwIDAgMSAxLjk3IDMuOTR2Ny4xOGEyLjU3IDIuNTcgMCAwIDEtLjU2MiAxLjYwNGwtMy4yMzQgNC4wNDhhLjY2LjY2IDAgMCAxLS41MTUuMjQ4aC0xLjIxN2EuMjMyLjIzMiAwIDAgMS0uMTg2LS4zNzFsMi4yMzktMi45ODlhMi40IDIuNCAwIDAgMC0uNDgtMy4zNmwtMi41MTItMS44ODdBMS45NiAxLjk2IDAgMCAwIDIwLjMxOSAyMWgtOC4wMDRhNC45IDQuOSAwIDAgMS0xLjk2NS0uNDA2YS4yNi4yNiAwIDAgMC0uMjg3LjA1NmwtLjg4Ljg4YS42Ni42NiAwIDAgMCAuMDE2Ljk1MmwxLjI2MiAxLjI3NGEuODQuODQgMCAwIDAgLjU5LjI0NGguNDU3Yy4yNjQgMCAuNDc4LjIxNS40NzguNDc5djEuMDQzYS40OC40OCAwIDAgMS0uNDc5LjQ3OGgtLjQ1NmEyLjggMi44IDAgMCAxLTIuMDAyLS44M2wtMS4yNDUtMS4yNTZhMi43MyAyLjczIDAgMCAxLS44MTEtMS45MWEyLjY1IDIuNjUgMCAwIDEgLjc3OS0xLjg4OGwuNjQxLS42NDNhLjI2LjI2IDAgMCAwIC4wMTktLjM0OEE0Ljk1IDQuOTUgMCAwIDEgNy40IDE2LjcxMkw2LjI5IDguNjY3YS4yOTcuMjk3IDAgMCAwLS40MDUtLjIzNWwtMS40MjguNTc2bC0xLjI3My0yLjI5bDEuNTc4LTEuNzFoLS44MDdhLjI0Ni4yNDYgMCAwIDEtLjI0Mi0uMjgzQTIuMDA2IDIuMDA2IDAgMCAxIDUuNjk4IDNoLjcydi0uNzNhLjI3LjI3IDAgMCAxIC40MTUtLjIyN2wxLjI3NC45NTRoNS4yMjdjLjIzNSAwIC40MjYuMTkxLjQyNi40MjdjMCAuNjYzLS4zNDUgMS4yNDQtLjg2NSAxLjU3NWgyLjY2OGMuMjQgMCAuNDM1LjE5Ni40MzUuNDM2QTMuMDcgMy4wNyAwIDAgMSAxNC42MjIgOGgyLjU4MmMuMjI4IDAgLjQxMi4xODUuNDEyLjQxM2E0LjAxIDQuMDEgMCAwIDEtMi4xMzEgMy41NDdxLjI1OS4wNC41MjYuMDRNNi41IDYuNTUzYS41LjUgMCAwIDAgLjUtLjVWNS41YS41LjUgMCAxIDAtLjk5OSAwdi41NTRhLjUuNSAwIDAgMCAuNS41Ii8+PHBhdGggZD0ibTIuODI3IDcuMTA0bC0uNTQzLjU5YTEuMDcgMS4wNyAwIDAgMC0uMjYzLjkzOWMuMTQuNjg3LjgyIDEuMDI4IDEuNDcuNzY1bC40OTktLjIwMXptMy40NjUgOC44OTVoLS42NGEyLjY2IDIuNjYgMCAwIDAtMi42NTkgMi42NjJ2Mi4zNmMwIC43NTcuMjk1IDEuNDY5LjgzIDIuMDA0bC4zOTIuMzkyYS4zOC4zOCAwIDAgMCAuNTM4IDBsLjg3My0uODc2YS4zOC4zOCAwIDAgMCAwLS41MzhsLS4zOTItLjM5MmEuODQuODQgMCAwIDEtLjI0NC0uNTl2LTIuMzZjMC0uMzY2LjI5Ny0uNjYyLjY2Mi0uNjYyaDEuMDM0YTYgNiAwIDAgMS0uMjc3LTEuMTUxek0xOC45NzYgMjJ2MS4xNzVhLjk2Ljk2IDAgMCAxLS4yODEuNjc2bC0uODgyLjg3OGEyLjg0IDIuODQgMCAwIDAtLjgzNCAyLjAxOHYuOTM3YzAgLjE3NC4xNC4zMTYuMzE1LjMxNmgxLjM2N2EuMzE2LjMxNiAwIDAgMCAuMzE1LS4zMTZ2LS45MzdjMC0uMjI3LjA5LS40NDQuMjUtLjYwNGwyLjk3LTIuOTc0bC0xLjMtLjk3NmEuOTYuOTYgMCAwIDAtLjU3Ny0uMTkzeiIvPjwvZz48L3N2Zz4="}, {"id": "N08", "phase": "main", "article": "das", "german": "Blatt", "fullGerman": "das Blatt", "korean": "나뭇잎", "level": "A1", "deSyllables": 1, "koSyllables": 3, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:maple-leaf", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xNy4wMDkgMS42NDJhMS4yMDggMS4yMDggMCAwIDAtMi4xMzUgMGwtLjAwNi4wMTJsLTEuNDg4IDIuOTgzbC0yLjY2My0xLjU3NGMtLjg3LS41MTgtMS45ODcuMjEzLTEuODA1IDEuMjQzbDEuMzMgNy42MDRsLTMuMTE2LTEuODcyYy0uOTI4LS41NjgtMi4wODcuMjkyLTEuNzkzIDEuMzUybC4wMDIuMDA5bC4zMyAxLjE0M2wtMi45MDgtLjI2NGMtMS4xMDgtLjExOC0xLjU5NyAxLjA4LTEuMTQ4IDEuODI5bC4wMDQuMDA3bDEuNTUxIDIuNDkxbC0xLjE3Ni4yMjNjLTEuMTUuMjAzLTEuMjc1IDEuNjI3LS40NTggMi4xODlsLjAwOS4wMDZsNS45OTUgMy45MzJsLTEuNTQ2IDIuMjAzbC0uMDA0LjAwNWExLjE2NyAxLjE2NyAwIDAgMCAxLjM2NCAxLjc1Nmw3LjU5OC0yLjc3NXY0LjgyOWExIDEgMCAxIDAgMiAwVjI0LjE1bDcuNTc4IDIuNzY4YzEuMDQ4LjM5OSAyLjA1NS0uODIgMS4zNTItMS43NzNsLTEuNTM3LTIuMTlsNi0zLjkzN2wuMDE0LS4wMWMuNDAyLS4yODMuNTktLjc2LjUxLTEuMjE3YTEuMTkgMS4xOSAwIDAgMC0uOTY3LS45NzNsLTEuMTc3LS4yMjNsMS41NS0yLjQ5MmwuMDA1LS4wMDdjLjQ5Ny0uODMtLjEyMi0xLjg5LTEuMTA2LTEuODMzbC0uMDE2LjAwMWwtMi45MzUuMjY3bC4zMjEtMS4xMjVsLjAwMi0uMDA3Yy4yOTUtMS4wNjQtLjg3NC0xLjkyNy0xLjgwNC0xLjM0NWwtLjAwNC4wMDJMMjEuODIgMTEuOWwxLjA1LTcuNjV2LS4wMWExLjIxIDEuMjEgMCAwIDAtLjUyNS0xLjE0N2ExLjE5IDEuMTkgMCAwIDAtMS4zMDgtLjAxN0wxOC40OTQgNC42MmwtMS40NzktMi45NjZ6bS42NDMgMjAuNjM4bDUuNjUyLTIuOTA4YTEgMSAwIDEgMC0uOTE1LTEuNzc5bC01LjQ0MyAyLjh2LTguMTJhMSAxIDAgMSAwLTIgMHY4LjEybC01LjQ0Mi0yLjhhMSAxIDAgMCAwLS45MTUgMS43NzlsNS42NDQgMi45MDRsLTUuMDggMS44NTVsLjQxMy0uNTlsLjAxLS4wMTVhMS4zNTYgMS4zNTYgMCAwIDAtLjM5My0xLjg4MWwtLjAwMy0uMDAybC00LjktMy4yMTRsLjM3NS0uMDdjLjg4MS0uMTQzIDEuMjYzLTEuMTM0LjgxNi0xLjgzM2wtMS4zMTYtMi4xMTNsMi40NjcuMjI0Yy45MDMuMTAyIDEuNTA2LS43NTggMS4yODYtMS41M2wtLjA5My0uMzIxbDIuODg3IDEuNzM0Yy44Ny41MjIgMS45OS0uMjEgMS44MS0xLjI0bC0xLjMzMy03LjYyMWwxLjkxNyAxLjEzM2MuNTkuMzUyIDEuMzkuMTM2IDEuNy0uNTEzbDEuMTQ1LTIuMjk3bDEuMTUxIDIuMzA4Yy4zMi42NCAxLjExOC44MzggMS42OTkuNDlsMS44NjctMS4xMzVsLTEuMDU0IDcuNjgxdi4wMWMtLjEyMiAxLjAzNCAxIDEuNjcgMS44MjcgMS4xNzRsLjAxLS4wMDZsMi42MDItMS42NDVsLS4wNjguMjM5Yy0uMjUzLjg4NS41MDIgMS41ODUgMS4yNTMgMS41MzJoLjAxbDIuNDktLjIyN2wtMS4zMjggMi4xMzNsLS4wMDcuMDEzYTEuMjEyIDEuMjEyIDAgMCAwIC43OTQgMS43OTFsLjAxMS4wMDNsLjQwOC4wNzdsLTQuOTEzIDMuMjIzbC0uMDAzLjAwMmExLjM2IDEuMzYgMCAwIDAtLjM3OCAxLjkwNGwuNDA5LjU4MnoiLz48L3N2Zz4="}, {"id": "N09", "phase": "main", "article": "das", "german": "Geld", "fullGerman": "das Geld", "korean": "돈", "level": "A1", "deSyllables": 1, "koSyllables": 1, "isCompound": false, "firstLetter": "G", "iconId": "fluent-emoji-high-contrast:euro-banknote", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0yMCAyMS40NzNxLjI0Ni4wMjcuNS4wMjdhNC41IDQuNSAwIDEgMC0uNS04Ljk3MnpNOCAxNi41djEuMDFINi41YS41LjUgMCAwIDAgMCAxaDEuNTA0Yy4wOSAxLjcwNyAxLjUxIDIuOTkgMy4yMTYgMi45OWgxLjI4YS41LjUgMCAwIDAgMC0xaC0xLjI4Yy0xLjE4IDAtMi4xMjYtLjg2My0yLjIxMy0xLjk5SDExLjVhLjUuNSAwIDEgMCAwLTFIOVYxNi41aDIuNWEuNS41IDAgMCAwIDAtMUg5LjAxNWMuMTMtMS4xMTQgMS4wNzctMiAyLjIwNS0yaDEuMjhhLjUuNSAwIDAgMCAwLTFoLTEuMjhjLTEuNjk3IDAtMy4wNzcgMS4zNS0zLjIxIDNINi41YS41LjUgMCAwIDAgMCAxeiIvPjxwYXRoIGQ9Ik0xLjUgMTBhMyAzIDAgMCAxIDMtM2gyM2EzIDMgMCAwIDEgMyAzdjE4YTIuNSAyLjUgMCAwIDEtMi41IDIuNWgtOFYyNWg3LjVhMSAxIDAgMCAwIDEtMVYxMGExIDEgMCAwIDAtMS0xSDE5djFoNy41YTEgMSAwIDAgMSAxIDF2MTJhMSAxIDAgMCAxLTEgMUgxOXY2LjVoLTRWMjRINS41YTEgMSAwIDAgMS0xLTFWMTFhMSAxIDAgMCAxIDEtMUgxNVY5SDQuNWExIDEgMCAwIDAtMSAxdjE0YTEgMSAwIDAgMCAxIDFIMTR2NS41SDRBMi41IDIuNSAwIDAgMSAxLjUgMjh6bTI1IDFIMTl2MTJoNy41em0tMjEgMHYxMkgxNVYxMXoiLz48L2c+PC9zdmc+"}, {"id": "N10", "phase": "main", "article": "das", "german": "Ei", "fullGerman": "das Ei", "korean": "달걀", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "E", "iconId": "fluent-emoji-high-contrast:egg", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik05LjA4NSA0LjgzN0E4Ljc3IDguNzcgMCAwIDEgMTYuMzMxIDFhOC43NyA4Ljc3IDAgMCAxIDcuMjAyIDMuNzhsLjAwMS4wMDJhMjIuOSAyMi45IDAgMCAxIDMuOTUzIDE1LjE0MXYuMDAzbC0uMDkuOTI1di4wMDNBMTEuMTQ0IDExLjE0NCAwIDAgMSAxNi4yOSAzMC45OGMtNS43NDMgMC0xMC41NTUtNC4zNi0xMS4xMDUtMTAuMDgydi0uMDAzbC0uMDgtLjc5NnYtLjAwM0EyMi45MiAyMi45MiAwIDAgMSA4Ljk1NCA1LjAyOWwuMDAyLS4wMDR6TTE2LjMzMSAzYTYuNzcgNi43NyAwIDAgMC01LjU5MyAyLjk2MmwtLjAwMi4wMDNsLS4xMjguMTg4YTIwLjkyIDIwLjkyIDAgMCAwLTMuNTExIDEzLjc1MWwuMDguOGE5LjE1MyA5LjE1MyAwIDAgMCA5LjExNCA4LjI3NmE5LjE0NCA5LjE0NCAwIDAgMCA5LjExNC04LjMxMXYtLjAwNWwuMDktLjkyN3YtLjAwMkEyMC45IDIwLjkgMCAwIDAgMjEuODkgNS45MTlBNi43NyA2Ljc3IDAgMCAwIDE2LjMzIDMiLz48L3N2Zz4="}, {"id": "N11", "phase": "main", "article": "das", "german": "Fleisch", "fullGerman": "das Fleisch", "korean": "고기", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "F", "iconId": "fluent-emoji-high-contrast:meat-on-bone", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC45MyAyLjI5YTMuOCAzLjggMCAwIDEgLjg1MyAzLjI5MWE3LjkgNy45IDAgMCAxIDIuODY1LS44MTZhNy44MyA3LjgzIDAgMCAxIDQuNDUuOTM3YTIxLjI0IDIxLjI0IDAgMCAxIDguMzg1IDguMzczYTcuOCA3LjggMCAwIDEgLjYwMyA2LjE2YTMuNyAzLjcgMCAwIDEgMS42MDcuODE5bC4wMDQuMDAzYzEuNjYgMS40NTggMS43NCAzLjk5OC4xOTYgNS41M2EzLjggMy44IDAgMCAxLTIuMjE0IDEuMDgzYy0uMS44MTMtLjQ2IDEuNTkxLTEuMDg0IDIuMjE2YTMuNzkgMy43OSAwIDAgMS01LjU0Mi0uMTl2LS4wMDJhMy43IDMuNyAwIDAgMS0uODItMS42MTNhNy44NCA3Ljg0IDAgMCAxLTYuMTU3LS41OTZhMjEuMyAyMS4zIDAgMCAxLTguMzc0LTguMzczYTcuOCA3LjggMCAwIDEtLjkyNC00LjY2N2E3LjggNy44IDAgMCAxIC44MDEtMi42NmEzLjggMy44IDAgMCAxLTMuMjktLjg1NGwtLjAwNC0uMDAzYTMuNzkgMy43OSAwIDAgMS0uMTc4LTUuNTIzYTMuNzQgMy43NCAwIDAgMSAyLjIxLTEuMDg3Yy4xLS44MDYuNDU4LTEuNTkxIDEuMDgzLTIuMjE2bC4wMDMtLjAwM2EzLjggMy44IDAgMCAxIDUuNTIzLjE4N3ptOS40NSAyMy41ODVxLjE0NS0uMzkuMzczLS43NDhhMy42NSAzLjY1IDAgMCAxLTIuMTk2LjcyMmMtLjk5IDAtMS45MS0uMzgtMi42MS0xLjA4cy0xLjA4LTEuNjItMS4wOC0yLjYxcy4zOC0xLjkxIDEuMDgtMi42MWwzLjYtMy42Yy43LS43IDEuNjItMS4wOCAyLjYxLTEuMDhjLjk4IDAgMS45MS4zOSAyLjYxIDEuMDhjLjcuNyAxLjA4IDEuNjIgMS4wOCAyLjYxYzAgLjgwNS0uMjUgMS41NjMtLjcyIDIuMTk1Yy4yMzgtLjE1My40OTItLjI3OC43NTQtLjM3NWE1LjgyIDUuODIgMCAwIDAtLjE0OS01LjMzN2ExOS4yNCAxOS4yNCAwIDAgMC03LjU5Ni03LjU4N2E1LjgzIDUuODMgMCAwIDAtMy4zMTQtLjY5N2E1Ljg0IDUuODQgMCAwIDAtMy42MTggMS42NzhsLTIuNzcgMi43OGE1LjgyIDUuODIgMCAwIDAtLjk4MSA2LjkzYTE5LjMgMTkuMyAwIDAgMCA3LjU4NiA3LjU4N2E1Ljg1IDUuODUgMCAwIDAgNS4zNDIuMTQyTTYuMjg4IDQuNzYzdi4wMmMtLjAyNy44MDQtLjY3NSAxLjUtMS41MyAxLjUwNmExLjc1IDEuNzUgMCAwIDAtMS4yMjYuNTJsLS4wMDYuMDA3Yy0uNzI1LjcyNC0uNyAxLjkxNi4wODMgMi42MTJhMS44MSAxLjgxIDAgMCAwIDIuMzUuMDFhMS41MSAxLjUxIDAgMCAxIDEuNjU4LS4yMzRMOS4yIDcuNjE0YTEuNTEgMS41MSAwIDAgMSAuMjM1LTEuNjU1YTEuODEgMS44MSAwIDAgMC0uMDEtMi4zNWExLjggMS44IDAgMCAwLTIuNjEzLS4wOTJjLS4zNDcuMzQ4LS41Mi43OTUtLjUyNiAxLjI0Nm0xNC40NDggMTQuNTgzbC0xLjM5IDEuMzlhLjA1LjA1IDAgMCAwLS4wMTUuMDM4cTAgLjAyNi4wMTUuMDM4bDMuMTkgMy4xOWExLjQ1IDEuNDUgMCAwIDEgLjA2NSAxLjk4NWMtLjYwOS43MDQtLjYxMyAxLjczMy0uMDM4IDIuMzk2YTEuNzkgMS43OSAwIDAgMCAyLjYxOC4wODlhMS43NyAxLjc3IDAgMCAwIC41MjctMS4yNDJjLjAwNS0uODU2LjcwMi0xLjUwNCAxLjUwNy0xLjUzbC4wMS0uMDAxaC4wMWMuNDUtLjAwNy44OTktLjE4IDEuMjQ2LS41MjdsLjAwMy0uMDAzYy43MTMtLjcwNy42OTQtMS45MDQtLjEwMy0yLjYwN2MtLjY2My0uNTc0LTEuNjktLjU2OS0yLjM5NC4wNEExLjQ1IDEuNDUgMCAwIDEgMjQgMjIuNTM2bC0zLjE5LTMuMTlhLjA1LjA1IDAgMCAwLS4wMzgtLjAxNWEuMDUuMDUgMCAwIDAtLjAzNy4wMTUiLz48L3N2Zz4="}, {"id": "N12", "phase": "main", "article": "das", "german": "Bild", "fullGerman": "das Bild", "korean": "액자(그림)", "level": "A1", "deSyllables": 1, "koSyllables": 2, "isCompound": false, "firstLetter": "B", "iconId": "fluent-emoji-high-contrast:framed-picture", "license": "MIT (Microsoft FluentUI Emoji High Contrast)", "imgData": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHN0eWxlPSJjb2xvcjojMWUyOTNiIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiPjxwYXRoIGQ9Ik0xOSAxMC41YS44OC44OCAwIDAgMC0uNTE4LS43OTlhLjg3NS44NzUgMCAwIDAtLjc5OS0xLjM4NGEuODc1Ljg3NSAwIDAgMC0xLjM4NC0uOGEuODc1Ljg3NSAwIDAgMC0xLjU5OCAwYS44NzUuODc1IDAgMCAwLTEuMzg0LjhhLjg3NS44NzUgMCAwIDAtLjggMS4zODRhLjg3NS44NzUgMCAwIDAgMCAxLjU5OGEuODc1Ljg3NSAwIDAgMCAuOCAxLjM4NGEuODc1Ljg3NSAwIDAgMCAxLjM4NC44YS44NzUuODc1IDAgMCAwIDEuNTk4IDBhLjg3NS44NzUgMCAwIDAgMS4zODQtLjhhLjg3NS44NzUgMCAwIDAgLjgtMS4zODRBLjg4Ljg4IDAgMCAwIDE5IDEwLjVNMTUuNSAxM2EyLjUgMi41IDAgMSAxIDAtNWEyLjUgMi41IDAgMCAxIDAgNSIvPjxwYXRoIGQ9Ik0yNyAyN0g1VjVoMjJ6TTI1LjY2NyA5LjExNGEzIDMgMCAwIDEgLjMzMy0uMzVWNkg2djMuMTdjLjU2My4yIDEuMDQ4LjU2MiAxLjQgMS4wM0ExIDEgMCAwIDEgOSAxMWEyIDIgMCAwIDEgMCA0SDZ2Mi4zODJsMS41MjEtLjc2YzEuMTEyLS42NSAzLjAyLS45NyA0LjkyNi0uMDE3bDQgMmMuMTYzLjA4Mi4yNDEuMDkuMjYzLjA5MWMuMDEyIDAgLjAzNC4wMDEuMDkzLS4wMjhjLjA3NS0uMDM3LjE4Ny0uMTEzLjM2My0uMjY4Yy4xNzUtLjE1Ni4zNy0uMzUuNjI3LS42MDdsMi44ODktMi44ODlhMyAzIDAgMCAxIDIuNTgtNC44OTNhMiAyIDAgMCAxIDIuNDA1LS44OTdNMjMgMTRsLTQuNSA0LjVjLTEgMS0xLjUgMS41LTIuNSAxbC00LTJjLTEuNi0uOC0zLjE2Ny0uNS00IDBsLTIgMXY3LjQwN2MyLjU0MS0yLjA3MiA2LjA4My0zLjQwNyAxMC0zLjQwN3M3LjQ1OSAxLjMzNSAxMCAzLjQwN1YxMi4wOTJjLTEuMDA1LjIwMy0xLjg1Ny43NjUtMyAxLjkwOCIvPjxwYXRoIGQ9Ik0xIDJhMSAxIDAgMCAxIDEtMWgyOGExIDEgMCAwIDEgMSAxdjI4YTEgMSAwIDAgMS0xIDFIMmExIDEgMCAwIDEtMS0xem0yIDF2MjZoMjZWM3oiLz48L2c+PC9zdmc+"}];
+
+const state = {
+  participant: {},
+  enabledIds: new Set(ALL_ITEMS.filter(x => x.phase === "main").map(x => x.id)),
+  mainPool: [],
+  stage: "setup",
+  queue: [],
+  idx: 0,
+  records: {},
+  timerStart: 0,
+  timerLimitMs: 5000,
+  timerInterval: null,
+  timedOut: false,
+  paused: false,
+  pausedRemainMs: 0,
+  pendingRt: 0,
+  pendingTimeout: false,
+  totSyl: "",
+  totArt: "",
+  answerSpoiled: false,
+  // Voice onset & optional Web Speech API
+  useVoiceDetect: true,
+  useSpeechRec: false,
+  audioCtx: null,
+  analyser: null,
+  micStream: null,
+  vuRaf: null,
+  voiceOnsetMs: null,
+  speechRec: null,
+  speechText: "",
+};
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showOnly(id) {
+  ["screenSetup", "screenGallery", "screenIntro", "screenTrial", "screenVerify", "screenResults"].forEach(s => {
+    document.getElementById(s).classList.toggle("hidden", s !== id);
+  });
+}
+
+function updateHeader(phaseText, cur, total) {
+  document.getElementById("hdrPhase").textContent = phaseText;
+  document.getElementById("hdrCount").textContent = `${cur} / ${total}`;
+  const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
+  document.getElementById("hdrFill").style.width = `${pct}%`;
+}
+
+// MICROPHONE VOICE ONSET DETECTOR (offline Web Audio API)
+async function initMicrophone() {
+  if (!state.useVoiceDetect && !state.useSpeechRec) return;
+  if (state.micStream) return;
+  try {
+    state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const AudioContextCls = window.AudioContext || window.webkitAudioContext;
+    state.audioCtx = new AudioContextCls();
+    const src = state.audioCtx.createMediaStreamSource(state.micStream);
+    state.analyser = state.audioCtx.createAnalyser();
+    state.analyser.fftSize = 512;
+    src.connect(state.analyser);
+  } catch (e) {
+    state.useVoiceDetect = false;
+    console.warn("Mic unavailable:", e);
+  }
+}
+
+function startVoiceMonitor(langCode) {
+  state.voiceOnsetMs = null;
+  state.speechText = "";
+  const bar = document.getElementById("voiceBar");
+  const onsetEl = document.getElementById("onsetLabel");
+  const trEl = document.getElementById("voiceTranscript");
+  trEl.textContent = "";
+  onsetEl.textContent = "발화 대기 중";
+  document.getElementById("speakNudge").classList.add("hidden");
+
+  if (!state.useVoiceDetect && !state.useSpeechRec) {
+    bar.classList.add("hidden");
+    return;
+  }
+  bar.classList.remove("hidden");
+
+  // Web Audio volume / voice onset loop
+  if (state.useVoiceDetect && state.analyser) {
+    const buf = new Uint8Array(state.analyser.fftSize);
+    const loop = () => {
+      if (!state.analyser) return;
+      state.analyser.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = (buf[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / buf.length);
+      const pct = Math.min(100, Math.round(rms * 360));
+      document.getElementById("vuFill").style.width = `${pct}%`;
+
+      const elapsed = performance.now() - state.timerStart;
+      // Detect voice onset after initial 250ms settle
+      if (state.voiceOnsetMs === null && elapsed > 250 && rms > 0.045) {
+        state.voiceOnsetMs = Math.round(elapsed);
+        onsetEl.textContent = `발화 감지: ${(state.voiceOnsetMs / 1000).toFixed(2)}s`;
+        document.getElementById("speakNudge").classList.add("hidden");
+      } else if (state.voiceOnsetMs === null && elapsed > 2000 && !state.timedOut && !state.paused) {
+        document.getElementById("speakNudge").classList.remove("hidden");
+      }
+      state.vuRaf = requestAnimationFrame(loop);
+    };
+    state.vuRaf = requestAnimationFrame(loop);
+  }
+
+  // Optional Web Speech API live transcript
+  if (state.useSpeechRec) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      try {
+        stopSpeechRec();
+        const rec = new SR();
+        rec.lang = langCode;
+        rec.interimResults = true;
+        rec.continuous = true;
+        rec.onresult = ev => {
+          let txt = "";
+          for (let i = 0; i < ev.results.length; i++) {
+            txt += ev.results[i][0].transcript + " ";
+          }
+          state.speechText = txt.trim();
+          trEl.textContent = state.speechText ? `“${state.speechText}”` : "";
+        };
+        rec.onerror = () => {};
+        rec.start();
+        state.speechRec = rec;
+      } catch (e) {}
+    }
+  }
+}
+
+function stopSpeechRec() {
+  if (state.speechRec) {
+    try { state.speechRec.onresult = null; state.speechRec.stop(); } catch (e) {}
+    state.speechRec = null;
+  }
+}
+
+function stopVoiceMonitor() {
+  if (state.vuRaf) { cancelAnimationFrame(state.vuRaf); state.vuRaf = null; }
+  stopSpeechRec();
+  document.getElementById("vuFill").style.width = "0%";
+}
+
+// GALLERY
+function openGallery() { renderGallery(); showOnly("screenGallery"); }
+function closeGallery() { showOnly("screenSetup"); }
+function toggleAllMain(on) {
+  ALL_ITEMS.filter(x => x.phase === "main").forEach(x => {
+    if (on) state.enabledIds.add(x.id); else state.enabledIds.delete(x.id);
+  });
+  renderGallery();
+}
+function renderGallery() {
+  const grid = document.getElementById("galleryGrid");
+  grid.innerHTML = "";
+  const mainItems = ALL_ITEMS.filter(x => x.phase === "main");
+  const derC = mainItems.filter(x => x.article === "der" && state.enabledIds.has(x.id)).length;
+  const dieC = mainItems.filter(x => x.article === "die" && state.enabledIds.has(x.id)).length;
+  const dasC = mainItems.filter(x => x.article === "das" && state.enabledIds.has(x.id)).length;
+  document.getElementById("galleryStats").textContent =
+    `선택된 본 실험 문항: ${state.enabledIds.size} / 36개 (der ${derC} · die ${dieC} · das ${dasC})`;
+
+  ALL_ITEMS.forEach(item => {
+    const isMain = item.phase === "main";
+    const checked = !isMain || state.enabledIds.has(item.id);
+    const card = document.createElement("div");
+    card.className = "gal-card" + (checked ? "" : " unchecked");
+    card.innerHTML = `
+      <img src="${item.imgData}" alt="${item.korean}" />
+      <div class="gal-title">${item.fullGerman}</div>
+      <div class="gal-sub">${item.id} · ${item.korean} (${item.level})</div>
+      <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-top:auto;">
+        ${isMain ? `<label style="margin:0; font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+          <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleItem('${item.id}', this.checked)" /> 포함
+        </label>` : `<span class="tag tag-no">연습</span>`}
+        <label style="margin:0; font-size:11.5px; color:#2563eb; cursor:pointer; font-weight:600;">
+          교체<input type="file" accept="image/*" style="display:none;" onchange="replaceItemImg('${item.id}', this)" />
+        </label>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+function toggleItem(id, checked) {
+  if (checked) state.enabledIds.add(id); else state.enabledIds.delete(id);
+  renderGallery();
+}
+function replaceItemImg(id, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const it = ALL_ITEMS.find(x => x.id === id);
+    if (it) { it.imgData = e.target.result; renderGallery(); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// START
+async function startInstructions() {
+  const pid = document.getElementById("pid").value.trim() || "P02";
+  const exp = document.getElementById("experimenter").value;
+  const months = Number(document.getElementById("studyMonths").value) || 0;
+  const level = document.getElementById("selfLevel").value;
+  const mode = document.getElementById("runMode").value;
+  const limitSec = Math.max(3, Math.min(15, Number(document.getElementById("timeLimit").value) || 5));
+
+  state.useVoiceDetect = document.getElementById("optVoiceDetect").checked;
+  state.useSpeechRec = document.getElementById("optSpeechRec").checked;
+
+  let mainPool = ALL_ITEMS.filter(x => x.phase === "main");
+  if (mode === "selected") {
+    mainPool = mainPool.filter(x => state.enabledIds.has(x.id));
+    if (mainPool.length === 0) { alert("미리보기에서 최소 1개 이상의 문항을 선택해 주세요."); return; }
+  } else if (mode === "quick12") {
+    mainPool = [
+      ...mainPool.filter(x => x.article === "der").slice(0, 4),
+      ...mainPool.filter(x => x.article === "die").slice(0, 4),
+      ...mainPool.filter(x => x.article === "das").slice(0, 4),
+    ];
+  }
+
+  await initMicrophone();
+
+  state.participant = { pid, exp, months, level, mode, limitSec, startedAt: new Date().toISOString() };
+  state.timerLimitMs = limitSec * 1000;
+  state.records = {};
+  mainPool.forEach(item => { state.records[item.id] = { item, s2_cond: "" }; });
+  state.mainPool = mainPool;
+  openStageIntro("practice");
+}
+
+function assignStage2Conditions() {
+  const totRecs = shuffle(Object.values(state.records).filter(r => r.s1_status === "tot"));
+  const half = Math.ceil(totRecs.length / 2);
+  totRecs.forEach((r, idx) => {
+    r.s2_cond = idx < half ? "ko_cue" : "control_no_ko";
+  });
+  Object.values(state.records).forEach(r => {
+    if (r.s1_status !== "tot") r.s2_cond = "baseline";
+  });
+}
+
+function openStageIntro(stage) {
+  stopVoiceMonitor();
+  state.stage = stage;
+  showOnly("screenIntro");
+  const badge = document.getElementById("introBadge");
+  const title = document.getElementById("introTitle");
+  const script = document.getElementById("introScript");
+  const note = document.getElementById("introNote");
+  const lim = state.participant.limitSec;
+
+  if (stage === "practice") {
+    badge.textContent = "연습 단계 (3문항)";
+    title.textContent = "참여자 안내 및 즉각 발화 연습";
+    script.innerHTML = `“지금부터 화면에 물건 그림이 하나씩 나옵니다. <strong>그림을 보자마자 속으로 오래 고민하지 마시고, 떠오르는 생각이나 소리(‘어… 이거…’, ‘음…’)를 바로 입 밖으로 소리 내어</strong> 말씀해 주세요.<br><br>
+    • <strong>${lim}초 안에</strong> 독일어 이름(관사 포함)이 떠오르면 바로 말해 주세요.<br>
+    • <strong>${lim}초가 지나거나</strong> 알 것 같은데 혀끝에서 맴돌면 <strong>‘맴돈다(TOT)’</strong>고 말해 주시고, 떠오르는 <strong>첫 글자·음절 수·관사</strong>를 짐작해 주세요.<br>
+    • 전혀 모르는 단어면 편하게 <strong>‘모른다’</strong>고 말씀해 주세요. 먼저 연습 그림 3장으로 시작합니다.”`;
+    note.textContent = "연습 3문항은 본 집계에서 제외됩니다. 침묵하지 않고 바로 소리 내어 말하는 감각을 익혀 주세요.";
+    updateHeader("연습 안내", 0, 3);
+  } else if (stage === "stage1") {
+    badge.textContent = `1단계 · 독일어 이름 대기 (${state.mainPool.length}문항)`;
+    title.textContent = "1단계: 독일어 그림 이름 대기";
+    script.innerHTML = `“이제 본 실험 1단계를 시작합니다. 그림이 뜨자마자 <strong>소리 내어 반응</strong>해 주시고, <strong>${lim}초 안에</strong> 독일어 이름(관사 포함)이 떠오르지 않으면 바로 ‘맴돈다(TOT)’ 또는 ‘모른다’로 넘어갑니다.”`;
+    note.textContent = `문항당 ${lim}초 종료 시 '성공' 버튼이 자동으로 잠기고 TOT/모름만 선택할 수 있습니다.`;
+    updateHeader("1단계 안내", 0, state.mainPool.length);
+  } else if (stage === "stage2") {
+    assignStage2Conditions();
+    const s2Items = Object.values(state.records).filter(r => r.s2_cond !== "control_no_ko");
+    const cueN = Object.values(state.records).filter(r => r.s2_cond === "ko_cue").length;
+    const ctrlN = Object.values(state.records).filter(r => r.s2_cond === "control_no_ko").length;
+    badge.textContent = `2단계 · 한국어 이름 대기 (${s2Items.length}문항)`;
+    title.textContent = "2단계: 한국어 그림 이름 대기";
+    script.innerHTML = `“수고하셨습니다! 이제 2단계에서는 화면에 나오는 그림의 이름을 <strong>한국어</strong>로 바로 소리 내어 말씀해 주세요.”`;
+    note.textContent = `[실험자 참고] 1단계 TOT ${cueN + ctrlN}건 → 조건 A(한국어 경유) ${cueN}건 / 조건 B(통제·무경유) ${ctrlN}건 자동 배정 완료.`;
+    updateHeader("2단계 안내", 0, s2Items.length);
+  } else if (stage === "stage3") {
+    const totItems = Object.values(state.records).filter(r => r.s1_status === "tot").map(r => r.item);
+    badge.textContent = `3단계 · 독일어 TOT 재시도 (${totItems.length}문항)`;
+    title.textContent = "3단계: 맴돌던 독일어 단어 다시 시도하기";
+    if (totItems.length === 0) {
+      script.innerHTML = `1단계에서 독일어 TOT(맴돈다)로 기록된 문항이 0건입니다. 바로 결과 리포트로 이동합니다.`;
+      note.textContent = "";
+    } else {
+      script.innerHTML = `“이제 3단계입니다. 아까 1단계에서 혀끝에서 맴돌았던 그림 <strong>${totItems.length}장</strong>을 다시 보여 드릴게요. 지금 독일어 이름이 떠오르면 <strong>${lim}초 안에</strong> 관사와 함께 말씀해 주세요!”`;
+      note.textContent = "조건 A(한국어 경유)와 조건 B(통제·무경유)가 무작위로 섞여 제시됩니다.";
+    }
+    updateHeader("3단계 안내", 0, totItems.length);
+  }
+}
+
+function beginCurrentStage() {
+  if (state.stage === "practice") {
+    state.queue = ALL_ITEMS.filter(x => x.phase === "practice");
+  } else if (state.stage === "stage1") {
+    state.queue = shuffle(state.mainPool);
+  } else if (state.stage === "stage2") {
+    state.queue = shuffle(Object.values(state.records).filter(r => r.s2_cond !== "control_no_ko").map(r => r.item));
+  } else if (state.stage === "stage3") {
+    state.queue = shuffle(Object.values(state.records).filter(r => r.s1_status === "tot").map(r => r.item));
+    if (state.queue.length === 0) { finishAndShowResults(); return; }
+  }
+  state.idx = 0;
+  showOnly("screenTrial");
+  renderTrial();
+}
+
+function setTimeoutLock(locked) {
+  state.timedOut = locked;
+  const btnOk = document.getElementById("btnOk");
+  const banner = document.getElementById("timeoutBanner");
+  const keyHint = document.getElementById("btnOkKey");
+  btnOk.disabled = locked;
+  banner.classList.toggle("hidden", !locked);
+  keyHint.textContent = locked ? "시간 종료 (잠금)" : "단축키 1";
+}
+
+function renderTrial() {
+  stopTimer();
+  stopVoiceMonitor();
+  state.answerSpoiled = false;
+  setTimeoutLock(false);
+
+  document.getElementById("successPanel").classList.add("hidden");
+  document.getElementById("totPanel").classList.add("hidden");
+  document.getElementById("choiceGrid").classList.remove("hidden");
+  document.getElementById("btnTot").disabled = false;
+  document.getElementById("ansRevealBox").classList.remove("revealed");
+  document.getElementById("spoiledNote").classList.add("hidden");
+
+  const item = state.queue[state.idx];
+  const total = state.queue.length;
+  const cur = state.idx + 1;
+
+  document.getElementById("trialImg").src = item.imgData;
+  document.getElementById("trialCounter").textContent = `${cur} / ${total}`;
+  document.getElementById("ansRevealText").textContent = `${item.fullGerman} (${item.korean})`;
+
+  const badge = document.getElementById("trialBadge");
+  const prompt = document.getElementById("trialPrompt");
+  const timerBox = document.getElementById("timerBox");
+
+  if (state.stage === "practice") {
+    badge.textContent = "연습 (독일어)";
+    prompt.textContent = "연습: 그림을 보자마자 소리 내어 독일어(관사 포함)를 말해 주세요.";
+    document.getElementById("btnOkLabel").textContent = "성공 (안다)";
+    document.getElementById("btnTotLabel").textContent = "TOT (맴돈다)";
+    document.getElementById("btnNoLabel").textContent = "모름";
+    timerBox.classList.remove("hidden");
+    startTimer();
+    startVoiceMonitor("de-DE");
+    updateHeader("연습", cur, total);
+  } else if (state.stage === "stage1") {
+    badge.textContent = "1단계 · 독일어";
+    prompt.textContent = "그림을 보자마자 소리 내어 독일어(관사 포함)를 말해 주세요.";
+    document.getElementById("btnOkLabel").textContent = "성공 (안다)";
+    document.getElementById("btnTotLabel").textContent = "TOT (맴돈다)";
+    document.getElementById("btnNoLabel").textContent = "모름";
+    timerBox.classList.remove("hidden");
+    startTimer();
+    startVoiceMonitor("de-DE");
+    updateHeader("1단계 (독일어)", cur, total);
+  } else if (state.stage === "stage2") {
+    badge.textContent = "2단계 · 한국어";
+    prompt.textContent = "그림 속 물건의 이름을 한국어로 바로 말해 주세요.";
+    document.getElementById("btnOkLabel").textContent = "한국어 성공";
+    document.getElementById("btnTotLabel").textContent = "한국어 TOT";
+    document.getElementById("btnNoLabel").textContent = "모름";
+    timerBox.classList.add("hidden");
+    state.timerStart = performance.now();
+    startVoiceMonitor("ko-KR");
+    updateHeader("2단계 (한국어)", cur, total);
+  } else if (state.stage === "stage3") {
+    badge.textContent = "3단계 · 독일어 재시도";
+    prompt.textContent = "1단계에서 맴돌던 그림입니다. 지금 독일어 이름이 떠오르나요?";
+    document.getElementById("btnOkLabel").textContent = "해소됨 (말함)";
+    document.getElementById("btnTotLabel").textContent = "여전히 TOT";
+    document.getElementById("btnNoLabel").textContent = "모름";
+    timerBox.classList.remove("hidden");
+    startTimer();
+    startVoiceMonitor("de-DE");
+    updateHeader("3단계 (재시도)", cur, total);
+  }
+}
+
+// TIMER (locks Success button when time runs out!)
+function startTimer() {
+  state.paused = false;
+  document.getElementById("pauseBtn").textContent = "일시정지";
+  state.timerStart = performance.now();
+  state.pausedRemainMs = state.timerLimitMs;
+  tickTimer();
+  state.timerInterval = setInterval(tickTimer, 60);
+}
+function stopTimer() {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+}
+function tickTimer() {
+  if (state.paused) return;
+  const elapsed = performance.now() - state.timerStart;
+  const remain = Math.max(0, state.timerLimitMs - elapsed);
+  const pct = Math.max(0, (remain / state.timerLimitMs) * 100);
+  const numEl = document.getElementById("timerNum");
+  const barEl = document.getElementById("timerBar");
+  numEl.textContent = remain > 0 ? `${(remain / 1000).toFixed(1)}s` : "시간종료";
+  barEl.style.width = `${pct}%`;
+  const isWarn = remain <= 2000;
+  numEl.classList.toggle("warn", isWarn);
+  barEl.classList.toggle("warn", isWarn);
+
+  if (remain <= 0 && !state.timedOut) {
+    setTimeoutLock(true);
+    document.getElementById("speakNudge").classList.add("hidden");
+    stopTimer();
+  }
+}
+function togglePause() {
+  if (state.timedOut) return;
+  if (!state.timerInterval) return;
+  if (!state.paused) {
+    state.paused = true;
+    state.pausedRemainMs = Math.max(0, state.timerLimitMs - (performance.now() - state.timerStart));
+    document.getElementById("pauseBtn").textContent = "재개";
+  } else {
+    state.paused = false;
+    state.timerStart = performance.now() - (state.timerLimitMs - state.pausedRemainMs);
+    document.getElementById("pauseBtn").textContent = "일시정지";
+  }
+}
+
+// CHOICES
+function manualSuccessAfterTimeout() {
+  // Safety override if participant actually spoke before timeout but experimenter clicked slightly late
+  state.pendingRt = Math.round(performance.now() - state.timerStart);
+  state.pendingTimeout = true;
+  if (state.stage === "stage1") {
+    openSuccessPanel();
+  } else if (state.stage === "stage3") {
+    const item = state.queue[state.idx];
+    const rec = state.records[item.id];
+    rec.s3_status = "success";
+    rec.s3_rt = state.pendingRt;
+    nextTrial();
+  } else if (state.stage === "practice") {
+    nextTrial();
+  }
+}
+
+function chooseMain(choice) {
+  if (choice === "success" && state.timedOut) return;
+  if (choice === "tot" && state.answerSpoiled) return;
+
+  const rt = Math.round(performance.now() - state.timerStart);
+  const timeout = state.timedOut || rt > state.timerLimitMs;
+  state.pendingRt = rt;
+  state.pendingTimeout = timeout;
+
+  if (state.stage === "practice") {
+    if (choice === "tot") { stopTimer(); openTotPanel(); return; }
+    nextTrial();
+    return;
+  }
+
+  const item = state.queue[state.idx];
+  const rec = state.records[item.id];
+
+  if (state.stage === "stage1") {
+    stopTimer();
+    rec.s1_voiceOnset = state.voiceOnsetMs ?? "";
+    rec.s1_speech = state.speechText || "";
+    if (choice === "success") {
+      openSuccessPanel();
+      return;
+    } else if (choice === "tot") {
+      openTotPanel();
+      return;
+    } else {
+      rec.s1_status = "unknown";
+      rec.s1_rt = rt;
+      rec.s1_timeout = timeout;
+      nextTrial();
+    }
+  } else if (state.stage === "stage2") {
+    rec.s2_status = choice;
+    rec.s2_rt = rt;
+    nextTrial();
+  } else if (state.stage === "stage3") {
+    stopTimer();
+    rec.s3_status = choice;
+    rec.s3_rt = rt;
+    nextTrial();
+  }
+}
+
+function openSuccessPanel() {
+  document.getElementById("choiceGrid").classList.add("hidden");
+  document.getElementById("timeoutBanner").classList.add("hidden");
+  document.getElementById("successPanel").classList.remove("hidden");
+}
+
+function revealAnswerInPanel() {
+  document.getElementById("ansRevealBox").classList.add("revealed");
+  state.answerSpoiled = true;
+  document.getElementById("spoiledNote").classList.remove("hidden");
+}
+
+function confirmDeSuccess(outcome) {
+  const item = state.queue[state.idx];
+  const rec = state.records[item.id];
+  rec.s1_rt = state.pendingRt;
+  rec.s1_timeout = state.pendingTimeout;
+  if (outcome === "ok_art") {
+    rec.s1_status = "success";
+    rec.s1_artOk = true;
+  } else if (outcome === "ok_noart") {
+    rec.s1_status = "success";
+    rec.s1_artOk = false;
+  } else {
+    // Wrong word spoken -> separate "wrong" status, NEVER enters Stage 3 TOT retry!
+    rec.s1_status = "wrong";
+    rec.s1_artOk = false;
+  }
+  nextTrial();
+}
+
+function openTotPanel() {
+  document.getElementById("choiceGrid").classList.add("hidden");
+  document.getElementById("timeoutBanner").classList.add("hidden");
+  document.getElementById("totPanel").classList.remove("hidden");
+  document.getElementById("totFirst").value = "";
+  document.getElementById("totNote").value = state.speechText ? state.speechText.slice(0, 40) : "";
+  state.totSyl = "";
+  state.totArt = "";
+  document.querySelectorAll("#sylChips .chip").forEach((c, i, arr) => c.classList.toggle("active", i === arr.length - 1));
+  document.querySelectorAll("#artChips .chip").forEach((c, i, arr) => c.classList.toggle("active", i === arr.length - 1));
+  document.getElementById("totFirst").focus();
+}
+
+function cancelSubPanel() {
+  document.getElementById("successPanel").classList.add("hidden");
+  document.getElementById("totPanel").classList.add("hidden");
+  document.getElementById("choiceGrid").classList.remove("hidden");
+  if (state.timedOut) document.getElementById("timeoutBanner").classList.remove("hidden");
+  // Prevent TOT contamination if the answer was already revealed in the Success panel
+  if (state.answerSpoiled) {
+    document.getElementById("btnTot").disabled = true;
+  }
+}
+
+function pickChip(kind, val, el) {
+  const parent = kind === "syl" ? "#sylChips" : "#artChips";
+  document.querySelectorAll(`${parent} .chip`).forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  if (kind === "syl") state.totSyl = val; else state.totArt = val;
+}
+
+function submitTotPanel() {
+  if (state.stage === "stage1") {
+    const item = state.queue[state.idx];
+    const rec = state.records[item.id];
+    rec.s1_status = "tot";
+    rec.s1_rt = state.pendingRt;
+    rec.s1_timeout = state.pendingTimeout;
+    rec.tot_first = document.getElementById("totFirst").value.trim().toUpperCase().slice(0, 1);
+    rec.tot_syl = state.totSyl;
+    rec.tot_art = state.totArt;
+    rec.tot_note = document.getElementById("totNote").value.trim();
+  }
+  nextTrial();
+}
+
+function nextTrial() {
+  stopVoiceMonitor();
+  state.idx++;
+  if (state.idx < state.queue.length) { renderTrial(); return; }
+  stopTimer();
+  if (state.stage === "practice") openStageIntro("stage1");
+  else if (state.stage === "stage1") openStageIntro("stage2");
+  else if (state.stage === "stage2") openStageIntro("stage3");
+  else if (state.stage === "stage3") openVerifyStage();
+}
+
+// STAGE 4: VERIFY
+function openVerifyStage() {
+  state.stage = "verify";
+  const totRecs = Object.values(state.records).filter(r => r.s1_status === "tot");
+  if (totRecs.length === 0) { finishAndShowResults(); return; }
+  showOnly("screenVerify");
+  updateHeader("4단계 (정답 확인)", totRecs.length, totRecs.length);
+  const wrap = document.getElementById("verifyList");
+  wrap.innerHTML = "";
+  totRecs.forEach(r => {
+    r.s4_verified = true;
+    const condBadge = r.s2_cond === "ko_cue"
+      ? `<span class="tag tag-cue">조건 A: 한국어 경유</span>`
+      : `<span class="tag tag-ctrl">조건 B: 통제(무경유)</span>`;
+    const div = document.createElement("div");
+    div.style.cssText = "display:flex; align-items:center; gap:14px; border:1px solid var(--border); border-radius:12px; padding:12px; margin-top:10px; background:#f8fafc;";
+    div.innerHTML = `
+      <img src="${r.item.imgData}" style="width:68px; height:68px; object-fit:contain; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px;" />
+      <div style="flex:1;">
+        <div style="font-weight:800; font-size:16px;">${r.item.fullGerman} <span class="muted">(${r.item.korean})</span> ${condBadge}</div>
+        <div class="muted" style="font-size:13px;">
+          1단계 추측: 첫글자(${r.tot_first || "-"}) · 음절(${r.tot_syl || "-"}) · 관사(${r.tot_art || "-"})
+          ${r.tot_note ? " · 메모: " + r.tot_note : ""}
+          | 3단계: ${r.s3_status === "success" ? "해소됨" : (r.s3_status === "tot" ? "여전히 TOT" : "모름")}
+        </div>
+      </div>
+      <div class="chip-group" style="margin:0;">
+        <button type="button" class="chip active" onclick="setVerify('${r.item.id}', true, this)">맞음 (유효 TOT)</button>
+        <button type="button" class="chip" onclick="setVerify('${r.item.id}', false, this)">아님 (제외)</button>
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function setVerify(id, ok, el) {
+  state.records[id].s4_verified = ok;
+  el.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+}
+
+// STATS
+function computeSummary() {
+  const all = Object.values(state.records);
+  const s1_ok = all.filter(r => r.s1_status === "success");
+  const s1_wrong = all.filter(r => r.s1_status === "wrong");
+  const s1_tot_raw = all.filter(r => r.s1_status === "tot");
+  const s1_tot = s1_tot_raw.filter(r => r.s4_verified !== false);
+  const s1_unk = all.filter(r => r.s1_status === "unknown");
+
+  const pct = (num, den) => den > 0 ? Math.round((num / den) * 1000) / 10 : null;
+
+  const tot_cue = s1_tot.filter(r => r.s2_cond === "ko_cue");
+  const tot_ctrl = s1_tot.filter(r => r.s2_cond === "control_no_ko");
+
+  const koRate_totCue = pct(tot_cue.filter(r => r.s2_status === "success").length, tot_cue.length);
+  const resRate_cue = pct(tot_cue.filter(r => r.s3_status === "success").length, tot_cue.length);
+  const resRate_ctrl = pct(tot_ctrl.filter(r => r.s3_status === "success").length, tot_ctrl.length);
+
+  const firstGuessed = s1_tot.filter(r => r.tot_first);
+  const firstAcc = pct(firstGuessed.filter(r => r.tot_first === r.item.firstLetter).length, firstGuessed.length);
+  const sylGuessed = s1_tot.filter(r => r.tot_syl);
+  const sylAcc = pct(sylGuessed.filter(r => Number(r.tot_syl) === r.item.deSyllables || (r.tot_syl === "4" && r.item.deSyllables >= 4)).length, sylGuessed.length);
+  const artGuessed = s1_tot.filter(r => r.tot_art);
+  const artAcc = pct(artGuessed.filter(r => r.tot_art === r.item.article).length, artGuessed.length);
+
+  return {
+    total: all.length,
+    s1_ok_n: s1_ok.length,
+    s1_wrong_n: s1_wrong.length,
+    s1_tot_raw_n: s1_tot_raw.length,
+    s1_tot_n: s1_tot.length,
+    s1_unk_n: s1_unk.length,
+    tot_cue_n: tot_cue.length,
+    tot_ctrl_n: tot_ctrl.length,
+    koRate_totCue,
+    resRate_cue, resRate_ctrl,
+    firstAcc, first_n: firstGuessed.length,
+    sylAcc, syl_n: sylGuessed.length,
+    artAcc, art_n: artGuessed.length,
+  };
+}
+
+function fmtPct(v) { return v === null ? "-" : `${v}%`; }
+
+function renderMiniChart(title, bars, refPct) {
+  const w = 360, h = 215, plotX = 46, plotY = 24, plotW = 295, plotH = 132;
+  const slot = plotW / bars.length;
+  const bw = Math.min(58, slot * 0.55);
+  let rects = "";
+  bars.forEach((b, i) => {
+    const val = b.val === null ? 0 : b.val;
+    const bh = (val / 100) * plotH;
+    const cx = plotX + slot * (i + 0.5);
+    const x = cx - bw / 2;
+    const y = plotY + plotH - bh;
+    rects += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="${b.color}" />`;
+    rects += `<text x="${cx}" y="${Math.max(16, y - 6)}" text-anchor="middle" font-size="12" font-weight="700" fill="${b.color}">${fmtPct(b.val)}</text>`;
+    rects += `<text x="${cx}" y="${plotY + plotH + 18}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">${b.label}</text>`;
+    if (b.sub) rects += `<text x="${cx}" y="${plotY + plotH + 33}" text-anchor="middle" font-size="10.5" fill="#64748b">${b.sub}</text>`;
+  });
+  const refLine = refPct ? `
+    <line x1="${plotX}" y1="${plotY+plotH*(1-refPct/100)}" x2="${plotX+plotW}" y2="${plotY+plotH*(1-refPct/100)}" stroke="#dc2626" stroke-dasharray="4,4" stroke-width="1.2"/>
+    <text x="${plotX+plotW}" y="${plotY+plotH*(1-refPct/100)-4}" text-anchor="end" font-size="10" font-weight="700" fill="#dc2626">우연/기준 (${refPct}%)</text>
+  ` : "";
+  return `<div class="chart-card">
+    <div style="font-weight:700; font-size:14px; margin-bottom:6px;">${title}</div>
+    <svg viewBox="0 0 ${w} ${h}" width="100%">
+      <line x1="${plotX}" y1="${plotY}" x2="${plotX}" y2="${plotY+plotH}" stroke="#64748b" stroke-width="1.2"/>
+      <line x1="${plotX}" y1="${plotY+plotH}" x2="${plotX+plotW}" y2="${plotY+plotH}" stroke="#64748b" stroke-width="1.2"/>
+      <text x="${plotX-6}" y="${plotY+4}" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+      <text x="${plotX-6}" y="${plotY+plotH*0.5+4}" text-anchor="end" font-size="10" fill="#64748b">50%</text>
+      <text x="${plotX-6}" y="${plotY+plotH+4}" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+      ${refLine}
+      ${rects}
+    </svg>
+  </div>`;
+}
+
+function finishAndShowResults() {
+  stopVoiceMonitor();
+  state.stage = "results";
+  showOnly("screenResults");
+  updateHeader("완료", state.mainPool.length, state.mainPool.length);
+
+  const s = computeSummary();
+  const p = state.participant;
+  document.getElementById("resPid").textContent = p.pid;
+  document.getElementById("resMeta").textContent =
+    `진행자: ${p.exp} · 독일어 학습 ${p.months}개월 (${p.level}) · 총 ${s.total}문항 (제한 ${p.limitSec}초 · v3)`;
+
+  document.getElementById("kpiGrid").innerHTML = `
+    <div class="kpi">
+      <div class="k-label">1단계 독일어 분포</div>
+      <div class="k-val">유효 TOT ${s.s1_tot_n}건</div>
+      <div class="k-sub">성공 ${s.s1_ok_n} · 오답 ${s.s1_wrong_n} · 유효TOT ${s.s1_tot_n} · 모름 ${s.s1_unk_n}</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">독일어 TOT 시 한국어 인출률</div>
+      <div class="k-val">${fmtPct(s.koRate_totCue)}</div>
+      <div class="k-sub">조건 A(한국어 경유, n=${s.tot_cue_n}) 기준</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">핵심 비교: 3단계 독일어 TOT 해소율</div>
+      <div class="k-val">${fmtPct(s.resRate_cue)} vs ${fmtPct(s.resRate_ctrl)}</div>
+      <div class="k-sub">한국어 경유(n=${s.tot_cue_n}) vs 통제·무경유(n=${s.tot_ctrl_n})</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">TOT 부분 정보 정답률</div>
+      <div class="k-val">관사 ${fmtPct(s.artAcc)}</div>
+      <div class="k-sub">첫글자 ${fmtPct(s.firstAcc)}(n=${s.first_n}) · 음절 ${fmtPct(s.sylAcc)}(n=${s.syl_n}) · 관사(우연 33.3%)</div>
+    </div>
+  `;
+
+  document.getElementById("chartWrap").innerHTML =
+    renderMiniChart("[결과 1] 3단계 독일어 TOT 해소율 (한국어 경유 vs 통제)", [
+      { label: "조건 A: 한국어 경유", sub: `n=${s.tot_cue_n}`, val: s.resRate_cue, color: "#2563eb" },
+      { label: "조건 B: 통제(무경유)", sub: `n=${s.tot_ctrl_n}`, val: s.resRate_ctrl, color: "#9333ea" },
+    ], null) +
+    renderMiniChart("[결과 2] TOT 부분 정보 정답률 (우연 33.3% 대비)", [
+      { label: "첫 글자", sub: `n=${s.first_n}`, val: s.firstAcc, color: "#0d9488" },
+      { label: "음절 수", sub: `n=${s.syl_n}`, val: s.sylAcc, color: "#0284c7" },
+      { label: "관사(der/die/das)", sub: `n=${s.art_n}`, val: s.artAcc, color: "#d97706" },
+    ], 33.3);
+
+  const tbl = document.getElementById("resultTable");
+  let html = `<thead><tr>
+    <th>ID</th><th>독일어</th><th>한국어</th>
+    <th>1단계(독)</th><th>발화시작</th><th>TOT 추측(첫/음/관)</th><th>2단계 배정</th><th>2단계(한)</th><th>3단계(재시도)</th><th>유효TOT</th>
+  </tr></thead><tbody>`;
+
+  Object.values(state.records).forEach(r => {
+    const badge = st => {
+      if (st === "success") return `<span class="tag tag-ok">성공</span>`;
+      if (st === "wrong") return `<span class="tag tag-wrong">오답</span>`;
+      if (st === "tot") return `<span class="tag tag-tot">TOT</span>`;
+      if (st === "unknown") return `<span class="tag tag-no">모름</span>`;
+      return "-";
+    };
+    const cond = r.s2_cond === "ko_cue"
+      ? `<span class="tag tag-cue">한국어 경유</span>`
+      : (r.s2_cond === "control_no_ko" ? `<span class="tag tag-ctrl">통제(무경유)</span>` : `<span class="muted">기저선</span>`);
+    const onset = r.s1_voiceOnset ? `${(r.s1_voiceOnset / 1000).toFixed(2)}s` : "-";
+    html += `<tr>
+      <td>${r.item.id}</td>
+      <td>${r.item.fullGerman}</td>
+      <td>${r.item.korean}</td>
+      <td>${badge(r.s1_status)}</td>
+      <td>${onset}</td>
+      <td>${r.s1_status === "tot" ? `${r.tot_first || "-"} / ${r.tot_syl || "-"} / ${r.tot_art || "-"}` : "-"}</td>
+      <td>${cond}</td>
+      <td>${r.s2_cond === "control_no_ko" ? `<span class="muted">생략</span>` : badge(r.s2_status)}</td>
+      <td>${badge(r.s3_status)}</td>
+      <td>${r.s1_status === "tot" ? (r.s4_verified !== false ? "O" : "X") : "-"}</td>
+    </tr>`;
+  });
+  html += "</tbody>";
+  tbl.innerHTML = html;
+}
+
+// CSV EXPORTS
+function csvEscape(v) {
+  const s = v === undefined || v === null ? "" : String(v);
+  return `"${s.replace(/"/g, '""')}"`;
+}
+function triggerCsv(filename, rows) {
+  const csv = "\uFEFF" + rows.map(r => r.map(csvEscape).join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function downloadDetailCsv() {
+  const p = state.participant;
+  const rows = [[
+    "참여자ID","진행자","학습개월","자기평가","제한시간_초","문항ID","관사","독일어","한국어","수준","독일어음절","복합어",
+    "1단계_독일어","1단계_관사정확","1단계_RT_ms","1단계_발화시작_ms","1단계_시간초과","1단계_음성기록",
+    "TOT_추측첫글자","TOT_첫글자정답","TOT_추측음절","TOT_음절정답","TOT_추측관사","TOT_관사정답","TOT_메모",
+    "2단계_배정조건","2단계_한국어","2단계_RT_ms","3단계_독일어재시도","3단계_RT_ms","4단계_유효TOT"
+  ]];
+  Object.values(state.records).forEach(r => {
+    const condKo = r.s2_cond === "ko_cue" ? "조건A_한국어경유" : (r.s2_cond === "control_no_ko" ? "조건B_통제무경유" : "기저선");
+    rows.push([
+      p.pid, p.exp, p.months, p.level, p.limitSec,
+      r.item.id, r.item.article, r.item.german, r.item.korean, r.item.level, r.item.deSyllables, r.item.isCompound ? "O" : "X",
+      r.s1_status || "", r.s1_artOk === undefined ? "" : (r.s1_artOk ? "O" : "X"), r.s1_rt || "", r.s1_voiceOnset || "", r.s1_timeout ? "O" : "X", r.s1_speech || "",
+      r.tot_first || "", r.tot_first ? (r.tot_first === r.item.firstLetter ? "O" : "X") : "",
+      r.tot_syl || "", r.tot_syl ? ((Number(r.tot_syl) === r.item.deSyllables || (r.tot_syl === "4" && r.item.deSyllables >= 4)) ? "O" : "X") : "",
+      r.tot_art || "", r.tot_art ? (r.tot_art === r.item.article ? "O" : "X") : "",
+      r.tot_note || "",
+      condKo,
+      r.s2_cond === "control_no_ko" ? "생략" : (r.s2_status || ""), r.s2_rt || "",
+      r.s3_status || "", r.s3_rt || "",
+      r.s1_status === "tot" ? (r.s4_verified !== false ? "O" : "X") : ""
+    ]);
+  });
+  triggerCsv(`독철TOT_v3_원자료_${p.pid}_${new Date().toISOString().slice(0,10)}.csv`, rows);
+}
+
+function downloadSummaryCsv() {
+  const p = state.participant;
+  const s = computeSummary();
+  const rows = [
+    ["참여자ID","진행자","학습개월","자기평가","제한시간_초","총문항","1단계_성공","1단계_오답","1단계_유효TOT","1단계_모름","한국어성공률_독TOT_조건A(%)","조건A_한국어경유_수","조건B_통제무경유_수","3단계해소율_한국어경유(%)","3단계해소율_통제무경유(%)","TOT_첫글자정답률(%)","TOT_음절정답률(%)","TOT_관사정답률(%)"],
+    [p.pid, p.exp, p.months, p.level, p.limitSec, s.total, s.s1_ok_n, s.s1_wrong_n, s.s1_tot_n, s.s1_unk_n, s.koRate_totCue ?? "", s.tot_cue_n, s.tot_ctrl_n, s.resRate_cue ?? "", s.resRate_ctrl ?? "", s.firstAcc ?? "", s.sylAcc ?? "", s.artAcc ?? ""]
+  ];
+  triggerCsv(`독철TOT_v3_요약_${p.pid}_${new Date().toISOString().slice(0,10)}.csv`, rows);
+}
+
+document.addEventListener("keydown", e => {
+  if (state.stage === "setup" || state.stage === "verify" || state.stage === "results") return;
+  if (document.activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+  if (document.getElementById("screenTrial").classList.contains("hidden")) return;
+  if (!document.getElementById("choiceGrid").classList.contains("hidden")) {
+    if (e.key === "1" && !state.timedOut) chooseMain("success");
+    else if (e.key === "2" && !state.answerSpoiled) chooseMain("tot");
+    else if (e.key === "3") chooseMain("unknown");
+    else if (e.code === "Space") { e.preventDefault(); togglePause(); }
+  }
+});
+</script>
+</body>
+</html>
